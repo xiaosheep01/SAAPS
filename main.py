@@ -14,12 +14,15 @@ from colorama import Fore, init
 example_use = r'''
 {}********************** Example of use ***********************{}
 
-  (1) If you have a sequence file(or a folder) and a motif file (without any annotations file):
+  (1) Calculate single amino acid polymorphisms in a sequence file:
       SAAPS -i your/sequence/path -c -o your/output/path
 
-  (2) If you have a sequence file(or a folder) and a motif file (with NCBI and ICTV annotation):
+  (2) Calculate and plot single amino acid polymorphisms in a sequence file:
       SAAPS -i your/sequence/path -c -cp -o your/output/path
+      
+  Tip: the input(file) and output(directory) is recommended absolute path.
 
+  Above is just a conceptual example, detailed usage in website: {}https://github.com/xiaosheep01/SAAPS
 {}***************************  End  ***************************{}
 
 '''.format(Fore.GREEN, Fore.RESET, Fore.RED, Fore.GREEN, Fore.RESET)
