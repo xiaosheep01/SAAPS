@@ -3,11 +3,14 @@
 # Developer: XiaoYang
 
 import argparse
+import json
 import os.path
 import platform
 import sys
 import time
+
 import pandas as pd
+
 import functions as func
 from colorama import Fore, init
 
@@ -24,12 +27,12 @@ example_use = r'''
 def starts():
     print(Fore.GREEN + "\n" + "===================================================================")
 
-    print("{}>>> {}Name: Single Amino Acid Polymorphism Statistic (SAAPS)".format(Fore.GREEN, Fore.RESET))
+    print("{}>>> {}Name: Single Amino Acid Polymorphism Statistic (SAPS)".format(Fore.GREEN, Fore.RESET))
 
     print(
         "{}>>> {}Description: Count SAP in viral protein sequences.".format(Fore.GREEN, Fore.RESET))
 
-    print("{}>>> {}Version: 0.1 (2024-03-06)".format(Fore.GREEN, Fore.RESET))
+    print("{}>>> {}Version: 0.1 (2023-11-22)".format(Fore.GREEN, Fore.RESET))
 
     print("{}>>> {}Author: Yang Xiao".format(Fore.GREEN, Fore.RESET))
 
