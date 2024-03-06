@@ -22,7 +22,7 @@ example_use = r'''
       
   Tip: the input(file) and output(directory) is recommended absolute path.
 
-  Above is just a conceptual example, detailed usage in website: {}https://github.com/xiaosheep01/SAAPS
+  Above are just simple examples, detailed instruction in website: {}https://github.com/xiaosheep01/SAAPS
 {}***************************  End  ***************************{}
 
 '''.format(Fore.GREEN, Fore.RESET, Fore.CYAN, Fore.GREEN, Fore.RESET)
