@@ -14,7 +14,11 @@ from colorama import Fore, init
 example_use = r'''
 {}********************** Example of use ***********************{}
 
-    {}THE PROJECT IS IN BETA, DO NOT RELEASE!
+  (1) If you have a sequence file(or a folder) and a motif file (without any annotations file):
+      SAAPS -i your/sequence/path -c -o your/output/path
+
+  (2) If you have a sequence file(or a folder) and a motif file (with NCBI and ICTV annotation):
+      SAAPS -i your/sequence/path -c -cp -o your/output/path
 
 {}***************************  End  ***************************{}
 
