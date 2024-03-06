@@ -24,10 +24,10 @@ example_use = r'''
 def starts():
     print(Fore.GREEN + "\n" + "===================================================================")
 
-    print("{}>>> {}Name: Single Amino Acid Polymorphism Statistic (SAAPS)".format(Fore.GREEN, Fore.RESET))
+    print("{}>>> {}Name: Single Amino Acid Polymorphism Statistic (SAPS)".format(Fore.GREEN, Fore.RESET))
 
     print(
-        "{}>>> {}Description: Count SAP in viral protein sequences.".format(Fore.GREEN, Fore.RESET))
+        "{}>>> {}Description: Count SAP in protein sequences.".format(Fore.GREEN, Fore.RESET))
 
     print("{}>>> {}Version: 0.1 (2024-03-06)".format(Fore.GREEN, Fore.RESET))
 
