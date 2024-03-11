@@ -1,0 +1,10 @@
+Basic Statistic Information of the Shannon Entropy (IC)
+	IC
+count	150.0
+mean	3.8647165333333335
+std	0.6037022002621197
+min	1.85989
+25%	3.48848
+50%	4.10595
+75%	4.45943
+max	4.45943

@@ -34,9 +34,9 @@ def starts():
     print("{}>>> {}Name: Single Amino Acid Polymorphism Statistic (SAAPS)".format(Fore.GREEN, Fore.RESET))
 
     print(
-        "{}>>> {}Description: Count SAP in protein sequences".format(Fore.GREEN, Fore.RESET))
+        "{}>>> {}Description: Count SAP in protein alignment sequences".format(Fore.GREEN, Fore.RESET))
 
-    print("{}>>> {}Version: 0.1 (2024-03-06)".format(Fore.GREEN, Fore.RESET))
+    print("{}>>> {}Version: 1.0 (2024-03-06)".format(Fore.GREEN, Fore.RESET))
 
     print("{}>>> {}Author: Yang Xiao".format(Fore.GREEN, Fore.RESET))
 
@@ -59,15 +59,14 @@ def starts():
                                  help="the path of the shannon result")
 
         basic_group = parser.add_argument_group("Basic Options")
-
         basic_group.add_argument("-dg", "--delete_gap", action="store_true", dest="dg",
-                                 help="delete the columns contained gaps in sequences")
+                                 help="delete the columns containing gaps in sequences")
         basic_group.add_argument("-t", "--translate", action="store_true", dest="translate",
                                  help="translate nucleotides to amino acids")
         basic_group.add_argument("-cs", "--cut_start", type=str, metavar="", dest="cut_start",
-                                 help="the start fragment of target sequence, no less than 7 amino acids")
+                                 help="the start fragment/site of target sequence, no less than 7 amino acids")
         basic_group.add_argument("-ce", "--cut_end", type=str, metavar="", dest="cut_end",
-                                 help="the end fragment of target sequence, no less than 7 amino acids")
+                                 help="the end fragment/site of target sequence, no less than 7 amino acids")
         basic_group.add_argument("-osn", "--output_seq_name", action="store_true", dest="name_output",
                                  help="output sequence name, in order to change the sequence name more conveniently")
         basic_group.add_argument("-csn", "--change_seq_name", type=str, metavar="", dest="change_name",
@@ -138,7 +137,8 @@ def starts():
         # output options
         output_group = parser.add_argument_group("Output Options")
         output_group.add_argument("-o", "--output_dir", type=str, metavar="", dest="output", default="",
-                                  help="the directory path of output file")
+                                  help="The directory path of output file, "
+                                       "the default is the current user document folder")
         output_group.add_argument("-pre", "--prefix", type=str, metavar="", dest="prefix",
                                   help="The prefix of the output file name")
 
@@ -147,7 +147,7 @@ def starts():
 
     my_args = parameters()
     result_content = ""
-    result_path = "~"                           # workpath in default
+    result_path = os.path.join(os.path.expanduser("~"), "Documents")        # workpath in default
     output_prefix = ""                          # the prefix of output file
     user_sys_os = platform.uname()[0]           # system operation type
     start_time = time.time()                    # pipeline start time
@@ -224,11 +224,8 @@ def starts():
         print("NOTE: Sequence processing completed!")
 
     # '-cs' and '-ce' parameters
-    # the principle of obtaining target sequence fragment: the first sequence in the sequence file will be regard as the
-    # reference sequence, and according to the location of the start and end fragment of the reference sequence, the
-    # remaining sequences will be cut.
-    # '-cs' and '-ce' represent the start and end fragment of the reference sequence, note the length of fragment should
-    # not be less than 8 amino acid.
+    # '-cs' and '-ce' represent the start and end fragment/site of the reference sequence, note the length of
+    # fragment should not be less than 8 amino acid.
     if my_args.cut_start and my_args.cut_end:
         # judge the type of input
         try:
@@ -282,7 +279,7 @@ def starts():
     # change the sequence names
     if my_args.change_name:
         change_result = func.change_name(result_content, my_args.change_name)
-        csn_result_path = result_path + os.sep + output_prefix + "NewName.txt"
+        csn_result_path = result_path + os.sep + output_prefix + "NewNameSeq.txt"
         func.list_to_save(change_result, csn_result_path)
 
     # '-cp' parameter
@@ -305,14 +302,15 @@ def starts():
         if my_args.plot_polymorphism:
             print(f"NOTE: Activating Polymorphism Plotting function!")
             figure_format = "pdf"
+            if my_args.format:
+                figure_format = my_args.format
+
             figure_name = result_path + os.sep + output_prefix + "SAPs" + "." + figure_format
             dpi = 300
             transparent = False
             figure_width = 14
             figure_height = 9
 
-            if my_args.format:
-                figure_format = my_args.format
             if my_args.fname:
                 figure_name = result_path + os.sep + output_prefix + my_args.fname + "." + figure_format
             if my_args.dpi:
@@ -350,6 +348,9 @@ def starts():
         if my_args.pic:
             print(f"NOTE: Activating IC Scatter Plotting function!")
             figure_format = "pdf"
+            if my_args.format:
+                figure_format = my_args.format
+
             figure_name = result_path + os.sep + output_prefix + "IC-Plot" + "." + figure_format
             dpi = 300
             transparent = False
@@ -357,8 +358,6 @@ def starts():
             figure_height = 8
             palette = "RdYlBu"
 
-            if my_args.format:
-                figure_format = my_args.format
             if my_args.fname:
                 figure_name = result_path + os.sep + output_prefix + my_args.fname + "." + figure_format
             if my_args.dpi:
@@ -443,6 +442,9 @@ def starts():
             pca_result["Virus"] = pca_result.index
             scatter_label = False
             figure_format = "pdf"
+            if my_args.format:
+                figure_format = my_args.format
+
             figure_name = result_path + os.sep + output_prefix + "PCA-Plot" + "." + figure_format
             dpi = 300
             transparent = False
@@ -450,8 +452,6 @@ def starts():
             figure_height = 6
             palette = "RdYlBu"
 
-            if my_args.format:
-                figure_format = my_args.format
             if my_args.fname:
                 figure_name = result_path + os.sep + output_prefix + my_args.fname + "." + figure_format
             if my_args.dpi:
@@ -522,6 +522,9 @@ def starts():
             tsne_result["Virus"] = tsne_result.index
             scatter_label = False
             figure_format = "pdf"
+            if my_args.format:
+                figure_format = my_args.format
+
             figure_name = result_path + os.sep + output_prefix + "tSNE-Plot" + "." + figure_format
             dpi = 300
             transparent = False
@@ -529,8 +532,6 @@ def starts():
             figure_height = 6
             palette = "RdYlBu"
 
-            if my_args.format:
-                figure_format = my_args.format
             if my_args.fname:
                 figure_name = result_path + os.sep + output_prefix + my_args.fname + "." + figure_format
             if my_args.dpi:

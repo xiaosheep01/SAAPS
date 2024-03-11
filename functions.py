@@ -1027,7 +1027,7 @@ def cluster_figure(dr_result,
     plt.tight_layout()
 
     plt.savefig(fname=fig_name, dpi=fig_dpi, transparent=tp_tag)
-    plt.show()
+    # plt.show()
 
 
 def output_palettes():
