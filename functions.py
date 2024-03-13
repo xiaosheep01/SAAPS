@@ -669,7 +669,7 @@ def pca(onehot_file_path):
         if dimension - 1 == onehot_mat.shape[0]:
             break
 
-    print(f"The cumulative variance is {Fore.BLUE}{cumulative_variance_ratio}")
+    print(f"The cumulative variance is {Fore.BLUE}{cumulative_variance_ratio}{Fore.RESET}")
 
     new_data = pd.DataFrame(new_data)
     new_data.index = onehot_mat.index

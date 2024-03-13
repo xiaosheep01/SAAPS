@@ -36,7 +36,7 @@ def starts():
     print(
         "{}>>> {}Description: Count SAP in protein alignment sequences".format(Fore.GREEN, Fore.RESET))
 
-    print("{}>>> {}Version: 1.0 (2024-03-06)".format(Fore.GREEN, Fore.RESET))
+    print("{}>>> {}Version: 1.3.1 (2024-03-06)".format(Fore.GREEN, Fore.RESET))
 
     print("{}>>> {}Author: Yang Xiao".format(Fore.GREEN, Fore.RESET))
 
@@ -48,7 +48,7 @@ def starts():
 
         parser = argparse.ArgumentParser(
             formatter_class=argparse.RawDescriptionHelpFormatter,
-            prog="SAPS",            # this parameter can change the name of pipeline in help information
+            prog="SAAPS",            # this parameter can change the name of pipeline in help information
             description="",
             epilog=example_use)
 
@@ -183,7 +183,7 @@ def starts():
                   (Fore.YELLOW, Fore.BLUE, os.path.realpath(my_args.output)))
             os.makedirs(result_path)
 
-    print("NOTE: The output path is %s'%s'" % (Fore.BLUE, result_path))
+    print("NOTE: The output path is %s'%s'%s" % (Fore.BLUE, result_path, Fore.RESET))
 
     # '-pre' parameter
     # the prefix of output
@@ -237,7 +237,7 @@ def starts():
             start_info, end_info = my_args.cut_start.upper(), my_args.cut_end.upper()       # upper the seq
             input_tag = "str"
 
-        print("Input information of cutting function:")
+        print("NOTE: Input information of cutting function:")
         print("'-cs':%s" % start_info)                           # print the input seq or site
         print("'-ce':%s" % end_info)
 
@@ -253,7 +253,7 @@ def starts():
                 pass
             elif any([len(start_info) > 10, len(end_info) > 10]):                 # fragment length is more than 10
                 print("%sWarning: the seq length ('-cs' or '-ce') you input is more than 10, "
-                      "the length about 5~10 is recommended" % Fore.YELLOW)
+                      "the length about 5~10 is recommended%s" % (Fore.YELLOW, Fore.RESET))
 
         target_seq = func.seq_cut(start_info, end_info, result_content, input_tag)
         result_content = target_seq                                     # receive a list
