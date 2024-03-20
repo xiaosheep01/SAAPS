@@ -144,6 +144,15 @@ def starts():
                                    help="The epsilon in DBSCAN, default is 0.5")
         cluster_group.add_argument("-minsap", "--min_samples", type=int, metavar="", dest="minsap",
                                    help="The min_samples state in DBSCAN, default is 6")
+        cluster_group.add_argument("-ops", "--OPTICS", action="store_true", dest="optics",
+                                   help="Ordering Points To Identify the Clustering Structure (OPTICS)")
+        cluster_group.add_argument("-km", "--K_Mean", action="store_true", dest="kmean",
+                                   help="K-Mean")
+        cluster_group.add_argument("-agg", "--Agglomerative", action="store_true", dest="agglo",
+                                   help="Agglomerative")
+        cluster_group.add_argument("-nc", "--n_cluster", type=int, metavar="", dest="nc",
+                                   help="the number of cluster in K_Mean and Agglomerative")
+
 
         # output options
         output_group = parser.add_argument_group("Output Options")
@@ -212,6 +221,12 @@ def starts():
         elif my_args.tsne:
             pass
         elif my_args.dbscan:
+            pass
+        elif my_args.optics:
+            pass
+        elif my_args.kmean:
+            pass
+        elif my_args.agglo:
             pass
         else:
             if os.path.isdir(my_args.input):                                # input is a folder
@@ -601,6 +616,62 @@ def starts():
         dbscan_res.to_csv(dbscan_result_path)
         print("NOTE: DBSCAN is done!")
 
+    if my_args.optics:
+        print("NOTE: Activating Ordering Points To Identify the Clustering Structure (OPTICS)")
+        optics_result_path = result_path + os.sep + output_prefix + "OPTICS.csv"
+
+        file_type = func.file_type_judge(my_args.input)
+        # determine the file type
+        if file_type == "CSV":
+            raw_df = pd.read_csv(my_args.input, header=0, index_col=0)
+        elif file_type == "XLSX":
+            raw_df = pd.read_excel(my_args.input, header=0)
+        else:
+            print(Fore.RED + "ERROR! The file type:%s is not supported right now!" % file_type)
+            sys.exit()
+
+        func.optics(dimension_mat=raw_df, result_path=optics_result_path)
+        print("NOTE: OPTICS is done!")
+
+    if my_args.kmean:
+        print("NOTE: Activating K-Mean")
+        kmean_result_path = result_path + os.sep + output_prefix + "KMean.csv"
+        n_cluster = 3
+        file_type = func.file_type_judge(my_args.input)
+        # determine the file type
+        if file_type == "CSV":
+            raw_df = pd.read_csv(my_args.input, header=0, index_col=0)
+        elif file_type == "XLSX":
+            raw_df = pd.read_excel(my_args.input, header=0)
+        else:
+            print(Fore.RED + "ERROR! The file type:%s is not supported right now!" % file_type)
+            sys.exit()
+
+        if my_args.nc:
+            n_cluster = my_args.nc
+
+        func.kmean(dimension_mat=raw_df, result_path=kmean_result_path, cluster=n_cluster)
+        print("NOTE: K-Mean is done!")
+
+    if my_args.agglo:
+        print("NOTE: Activating Agglomerative!")
+        agglo_result_path = result_path + os.sep + output_prefix + "Agglomerative.csv"
+        n_cluster = 3
+        file_type = func.file_type_judge(my_args.input)
+        # determine the file type
+        if file_type == "CSV":
+            raw_df = pd.read_csv(my_args.input, header=0, index_col=0)
+        elif file_type == "XLSX":
+            raw_df = pd.read_excel(my_args.input, header=0)
+        else:
+            print(Fore.RED + "ERROR! The file type:%s is not supported right now!" % file_type)
+            sys.exit()
+
+        if my_args.nc:
+            n_cluster = my_args.nc
+
+        func.agglomerative(dimension_mat=raw_df, result_path=agglo_result_path, cluster=n_cluster)
+        print("NOTE: Agglomerative is done!")
 
     if my_args.pac:
         func.output_palettes()
