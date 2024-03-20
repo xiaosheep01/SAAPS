@@ -123,6 +123,8 @@ def starts():
         dr_group.add_argument("-tsne", "--TSNE", action="store_true", dest="tsne",
                               help="Dimensionality reduction by t-SNE, "
                                    "please input the OneHot matrix from the '-oh' parameter")
+        dr_group.add_argument("-td", "--tSNE_dimension", type=int, metavar="", dest="td",
+                              help="The dimension in t_SNE, default is 2")
         dr_group.add_argument("-tpp", "--tSNE_perplexity", type=int, metavar="", dest="tpp",
                               help="The perplexity in t_SNE, default is 3")
         dr_group.add_argument("-tlr", "--tSNE_learn_rate", type=int, metavar="", dest="tlr",
@@ -133,6 +135,15 @@ def starts():
                               help="The random state in t_SNE, default is 1")
         dr_group.add_argument("-pc", "--plot_cluster", action="store_true", dest="pc",
                               help="Plot clustering scatter plot according to the result of dimensionality reduction")
+
+        # Clustering Options
+        cluster_group = parser.add_argument_group("Clustering Options")
+        cluster_group.add_argument("-dbs", "--DBSCAN", action="store_true", dest="dbscan",
+                                   help="Density-Based Spatial Clustering of Applications with Noise (DBSCAN)")
+        cluster_group.add_argument("-eps", "--epsilon", type=float, metavar="", dest="eps",
+                                   help="The epsilon in DBSCAN, default is 0.5")
+        cluster_group.add_argument("-minsap", "--min_samples", type=int, metavar="", dest="minsap",
+                                   help="The min_samples state in DBSCAN, default is 6")
 
         # output options
         output_group = parser.add_argument_group("Output Options")
@@ -199,6 +210,8 @@ def starts():
         elif my_args.pca:
             pass
         elif my_args.tsne:
+            pass
+        elif my_args.dbscan:
             pass
         else:
             if os.path.isdir(my_args.input):                                # input is a folder
@@ -484,12 +497,15 @@ def starts():
     if my_args.tsne:
         print("NOTE: Activating t-SNE function!")
         # tSNE default parameters
+        dimension = 2
         perplexity = 3
         learning_rate = 200
         n_iter = 5000
         random_state = 1
 
         # tSNE parameters
+        if my_args.td:
+            dimension = my_args.td
         if my_args.tpp:
             perplexity = my_args.tpp
         if my_args.tlr:
@@ -500,12 +516,14 @@ def starts():
             random_state = my_args.trs
 
         print("\n" + "t-SNE Parameters:")
-        print(f"Perplexity: {perplexity}, "
+        print(f"Dimension:{dimension}, "
+              f"Perplexity: {perplexity}, "
               f"Learning Rate: {learning_rate}, "
               f"n_iter: {n_iter}, "
               f"Random State: {random_state}")
 
         tsne_result = func.tsne(my_args.input,
+                                n_dimension=dimension,
                                 perp=perplexity,
                                 learn_rate=learning_rate,
                                 niter=n_iter,
@@ -557,6 +575,32 @@ def starts():
                                 color_tag=palette)
 
             print("\n" + "NOTE: Plotting Completed!")
+
+    if my_args.dbscan:
+        print("NOTE: Activating DBSCAN(Density-Based Spatial Clustering of Applications with Noise)")
+        dbscan_result_path = result_path + os.sep + output_prefix + "DBSCAN.csv"
+
+        file_type = func.file_type_judge(my_args.input)
+        # determine the file type
+        if file_type == "CSV":
+            raw_df = pd.read_csv(my_args.input, header=0, index_col=0)
+        elif file_type == "XLSX":
+            raw_df = pd.read_excel(my_args.input, header=0)
+        else:
+            print(Fore.RED + "ERROR! The file type:%s is not supported right now!" % file_type)
+            sys.exit()
+
+        eps = 0.5
+        minsap = 6
+        if my_args.eps:
+            eps = my_args.eps
+        if my_args.minsap:
+            minsap = my_args.minsap
+
+        dbscan_res = func.dbscan(dimension_mat=raw_df, result_path=dbscan_result_path, epsilon=eps, minPts=minsap)
+        dbscan_res.to_csv(dbscan_result_path)
+        print("NOTE: DBSCAN is done!")
+
 
     if my_args.pac:
         func.output_palettes()

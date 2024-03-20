@@ -10,6 +10,11 @@ import sys
 from functools import reduce
 from itertools import cycle
 from typing import Any
+
+from sklearn import metrics
+from sklearn.cluster import DBSCAN
+from sklearn.neighbors import NearestNeighbors
+
 import constant as ct
 from matplotlib import pyplot as plt, patches
 import matplotlib.colors as mcolors
@@ -678,7 +683,7 @@ def pca(onehot_file_path):
     return new_data
 
 
-def tsne(onehot_file_path, perp, learn_rate, niter, rand_state):
+def tsne(onehot_file_path, n_dimension, perp, learn_rate, niter, rand_state):
     filetype = file_type_judge(onehot_file_path)
     if filetype == "CSV":
         onehot_mat = pd.read_csv(onehot_file_path, header=0, index_col=0)
@@ -688,7 +693,7 @@ def tsne(onehot_file_path, perp, learn_rate, niter, rand_state):
         print(Fore.RED + "ERROR! The file type:%s is not supported right now!" % filetype)
         sys.exit()
 
-    t_sne = TSNE(n_components=2,
+    t_sne = TSNE(n_components=n_dimension,
                  perplexity=perp,
                  learning_rate=learn_rate,
                  n_iter=niter,
@@ -768,6 +773,39 @@ def set_differences(exp_mat, set_info):
     print(differ_list)
     differ_df = pd.DataFrame(differ_list, columns=["Group", "Species", "Sites"])
     return differ_df
+
+
+def dbscan(dimension_mat, result_path, epsilon, minPts):
+    result_path = os.path.dirname(result_path)
+    three_dimension_mat = dimension_mat.iloc[:, 0:3]
+
+    # judge suitable eps and min_samples parameters
+    plt.figure()
+    nn = NearestNeighbors(n_neighbors=5).fit(three_dimension_mat)
+    distances, idx = nn.kneighbors(three_dimension_mat)
+    distances = np.sort(distances, axis=0)
+    distances = distances[:, 1]
+    plt.plot(distances)
+    figure_name = os.path.join(result_path, "K-Distance.pdf")
+    # plt.savefig(figure_name, dpi=600)
+    plt.show()
+
+    # DBSCAN modeling
+    db_cluster = DBSCAN(eps=epsilon, min_samples=minPts).fit_predict(three_dimension_mat)
+
+    print(db_cluster)
+    three_dimension_mat["Label"] = db_cluster
+
+    print(three_dimension_mat)
+
+    # 计算轮廓系数
+    score = metrics.silhouette_score(three_dimension_mat, db_cluster)
+    print("\n" + "The Parameters in DBSCAN:")
+    print(f"eps:{epsilon}")
+    print(f"min_samples:{minPts}")
+    print(f"Silhouette Coefficient:{score}")
+
+    return three_dimension_mat
 
 
 def generate_random_colors(num_colors):
