@@ -12,7 +12,7 @@ from itertools import cycle
 from typing import Any
 
 from sklearn import metrics
-from sklearn.cluster import DBSCAN
+from sklearn.cluster import DBSCAN, OPTICS, KMeans, AgglomerativeClustering
 from sklearn.neighbors import NearestNeighbors
 
 import constant as ct
@@ -775,6 +775,31 @@ def set_differences(exp_mat, set_info):
     return differ_df
 
 
+def clustering_plot(cluster_res, dataframe, fig_name):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection="3d")
+
+    for tag in np.unique(cluster_res):
+        temp_df = dataframe[dataframe["Label"] == tag]
+        ax.scatter(temp_df.iloc[:, 0],
+                   temp_df.iloc[:, 1],
+                   temp_df.iloc[:, 2],
+                   alpha=1,
+                   label=f"Class {tag}")
+
+    # 设置坐标轴标签
+    ax.set_xlabel('C1')
+    ax.set_ylabel('C2')
+    ax.set_zlabel('C3')
+    # 添加图例
+    ax.legend(loc='center left', bbox_to_anchor=(1, 0.9))
+    # 使用Seaborn设置图形样式
+    sb.set(style="whitegrid")
+    # 显示图形
+    # plt.show()
+    plt.savefig(fig_name, dpi=600)
+
+
 def dbscan(dimension_mat, result_path, epsilon, minPts):
     result_path = os.path.dirname(result_path)
     three_dimension_mat = dimension_mat.iloc[:, 0:3]
@@ -786,17 +811,44 @@ def dbscan(dimension_mat, result_path, epsilon, minPts):
     distances = np.sort(distances, axis=0)
     distances = distances[:, 1]
     plt.plot(distances)
-    figure_name = os.path.join(result_path, "K-Distance.pdf")
-    # plt.savefig(figure_name, dpi=600)
-    plt.show()
+    K_figure_name = os.path.join(result_path, "K-Distance.pdf")
+    plt.savefig(K_figure_name, dpi=600)
+    # plt.show()
 
     # DBSCAN modeling
     db_cluster = DBSCAN(eps=epsilon, min_samples=minPts).fit_predict(three_dimension_mat)
 
     print(db_cluster)
     three_dimension_mat["Label"] = db_cluster
-
     print(three_dimension_mat)
+    figure_name = os.path.join(result_path, "DBSCAN.pdf")
+
+    # plotting
+    clustering_plot(cluster_res=db_cluster, dataframe=three_dimension_mat, fig_name=figure_name)
+    # fig = plt.figure()
+    # ax = fig.add_subplot(111, projection='3d')
+    #
+    # # ax.set_alpha(1)
+    # for tag in np.unique(db_cluster):
+    #     temp_df = three_dimension_mat[three_dimension_mat["Label"] == tag]
+    #     ax.scatter(temp_df.iloc[:, 0],
+    #                temp_df.iloc[:, 1],
+    #                temp_df.iloc[:, 2],
+    #                alpha=1,
+    #                label=f"Class {tag}")
+    #
+    # # 设置坐标轴标签
+    # ax.set_xlabel('C1')
+    # ax.set_ylabel('C2')
+    # ax.set_zlabel('C3')
+    # # 添加图例
+    # ax.legend(loc='center left', bbox_to_anchor=(1, 0.9))
+    # # 使用Seaborn设置图形样式
+    # sb.set(style="whitegrid")
+    # # 显示图形
+    # # plt.show()
+    #
+    # plt.savefig(figure_name, dpi=600)
 
     # 计算轮廓系数
     score = metrics.silhouette_score(three_dimension_mat, db_cluster)
@@ -806,6 +858,129 @@ def dbscan(dimension_mat, result_path, epsilon, minPts):
     print(f"Silhouette Coefficient:{score}")
 
     return three_dimension_mat
+
+
+def optics(dimension_mat, result_path):
+    result_path = os.path.dirname(result_path)
+    figure_name = os.path.join(result_path, "OPTICS.pdf")
+
+    three_dimension_mat = dimension_mat.iloc[:, 0:3]
+    opt_cluster = OPTICS(min_samples=3, max_eps=2).fit_predict(three_dimension_mat)
+    print(opt_cluster)
+    three_dimension_mat["Label"] = opt_cluster
+    print(three_dimension_mat.head())
+
+    # plotting
+    clustering_plot(cluster_res=opt_cluster, dataframe=three_dimension_mat, fig_name=figure_name)
+    # fig = plt.figure()
+    # ax = fig.add_subplot(111, projection='3d')
+    #
+    # # ax.set_alpha(1)
+    # for tag in np.unique(opt_cluster):
+    #     temp_df = three_dimension_mat[three_dimension_mat["Label"] == tag]
+    #     ax.scatter(temp_df.iloc[:, 0],
+    #                temp_df.iloc[:, 1],
+    #                temp_df.iloc[:, 2],
+    #                alpha=1,
+    #                label=f"Class {tag}")
+    #
+    # # 设置坐标轴标签
+    # ax.set_xlabel('C1')
+    # ax.set_ylabel('C2')
+    # ax.set_zlabel('C3')
+    # # 添加图例
+    # ax.legend(loc='center left', bbox_to_anchor=(1, 0.9))
+    # # 使用Seaborn设置图形样式
+    # sb.set(style="whitegrid")
+    # # 显示图形
+    # # plt.show()
+    # plt.savefig(figure_name, dpi=600)
+
+    # 计算轮廓系数
+    score = metrics.silhouette_score(three_dimension_mat, opt_cluster)
+    print(f"Silhouette Coefficient:{score}")
+
+
+def kmean(dimension_mat, result_path, cluster):
+    result_path = os.path.dirname(result_path)
+    figure_name = os.path.join(result_path, "K-Mean.pdf")
+
+    three_dimension_mat = dimension_mat.iloc[:, 0:3]
+    kmeans = KMeans(n_clusters=cluster).fit_predict(three_dimension_mat)
+    three_dimension_mat["Label"] = kmeans
+
+    print(three_dimension_mat.head())
+
+    # plotting
+    clustering_plot(cluster_res=kmeans, dataframe=three_dimension_mat, fig_name=figure_name)
+    # fig = plt.figure()
+    # ax = fig.add_subplot(111, projection='3d')
+    #
+    # # ax.set_alpha(1)
+    # for tag in np.unique(kmeans):
+    #     temp_df = three_dimension_mat[three_dimension_mat["Label"] == tag]
+    #     ax.scatter(temp_df.iloc[:, 0],
+    #                temp_df.iloc[:, 1],
+    #                temp_df.iloc[:, 2],
+    #                alpha=1,
+    #                label=f"Class {tag}")
+    #
+    # # 设置坐标轴标签
+    # ax.set_xlabel('C1')
+    # ax.set_ylabel('C2')
+    # ax.set_zlabel('C3')
+    # # 添加图例
+    # ax.legend(loc='center left', bbox_to_anchor=(1, 0.9))
+    # # 使用Seaborn设置图形样式
+    # sb.set(style="whitegrid")
+    # # 显示图形
+    # # plt.show()
+    # plt.savefig(figure_name, dpi=600)
+
+    # 计算轮廓系数
+    score = metrics.silhouette_score(three_dimension_mat, kmeans)
+    print(f"Silhouette Coefficient:{score}")
+
+
+def agglomerative(dimension_mat, result_path, cluster):
+    result_path = os.path.dirname(result_path)
+    figure_name = os.path.join(result_path, "Agglomerative.pdf")
+
+    three_dimension_mat = dimension_mat.iloc[:, 0:3]
+    agglom = AgglomerativeClustering(n_clusters=cluster).fit_predict(three_dimension_mat)
+    three_dimension_mat["Label"] = agglom
+
+    print(three_dimension_mat.head())
+
+    # plotting
+    clustering_plot(cluster_res=agglom, dataframe=three_dimension_mat, fig_name=figure_name)
+    # fig = plt.figure()
+    # ax = fig.add_subplot(111, projection='3d')
+    #
+    # # ax.set_alpha(1)
+    # for tag in np.unique(agglom):
+    #     temp_df = three_dimension_mat[three_dimension_mat["Label"] == tag]
+    #     ax.scatter(temp_df.iloc[:, 0],
+    #                temp_df.iloc[:, 1],
+    #                temp_df.iloc[:, 2],
+    #                alpha=1,
+    #                label=f"Class {tag}")
+    #
+    # # 设置坐标轴标签
+    # ax.set_xlabel('C1')
+    # ax.set_ylabel('C2')
+    # ax.set_zlabel('C3')
+    # # 添加图例
+    # ax.legend(loc='center left', bbox_to_anchor=(1, 0.9))
+    # # 使用Seaborn设置图形样式
+    # sb.set(style="whitegrid")
+    # # 显示图形
+    # # plt.show()
+    # plt.savefig(figure_name, dpi=600)
+
+    # 计算轮廓系数
+    score = metrics.silhouette_score(three_dimension_mat, agglom)
+    print(f"Silhouette Coefficient:{score}")
 
 
 def generate_random_colors(num_colors):
