@@ -122,7 +122,7 @@ def fasta_doc_std(file_list):
             seq_dic[seq_name].append(line)
 
     for seq_name in seq_name_list:
-        seq_list.append(seq_name + "\n" + "".join(seq_dic[seq_name]))           # element: seq_name + "\n" + seq
+        seq_list.append(seq_name + "\n" + "".join(seq_dic[seq_name]))  # element: seq_name + "\n" + seq
 
     return seq_list  # return list
 
@@ -195,7 +195,7 @@ def rna_to_dna(seq):
 def codon_check(seq_list):
     seq_len_list = []
     # judge the type of nucleic acid
-    ref_seq = seq_list[0].split("\n")[1]            # the first seq
+    ref_seq = seq_list[0].split("\n")[1]  # the first seq
     nt_tag = nucleotide_judge(ref_seq)
     print("NOTE: Input sequence is %s" % nt_tag)
 
@@ -582,17 +582,17 @@ def one_hot_encoding(seq_matrix, site_list):
     filtered_matrix = seq_matrix.iloc[site_list]
     # print(filtered_matrix.head())
 
-    tag = "type1"                                                                               # type1 is default
-    if "?" in filtered_matrix.values and "-" in filtered_matrix.values:                         # both "?" and "-"
+    tag = "type1"  # type1 is default
+    if "?" in filtered_matrix.values and "-" in filtered_matrix.values:  # both "?" and "-"
         tag = "type4"
         print(f"NOTE: Sequences contain illegal icon, IC tag is '{tag}'.")
-    elif "?" not in filtered_matrix.values and "-" in filtered_matrix.values:                   # not "?" but "-"
+    elif "?" not in filtered_matrix.values and "-" in filtered_matrix.values:  # not "?" but "-"
         tag = "type3"
         print(f"NOTE: Sequences contain illegal icon, IC tag is '{tag}'.")
-    elif "?" in filtered_matrix.values and "-" not in filtered_matrix.values:                   # not "-" but "?"
+    elif "?" in filtered_matrix.values and "-" not in filtered_matrix.values:  # not "-" but "?"
         tag = "type2"
         print(f"NOTE: Sequences contain illegal icon, IC tag is '{tag}'.")
-    elif "?" not in filtered_matrix.values and "-" not in filtered_matrix.values:               # not '?' or '-'
+    elif "?" not in filtered_matrix.values and "-" not in filtered_matrix.values:  # not '?' or '-'
         tag = "type1"
         print(f"NOTE: Sequences contain no illegal icon, IC tag is '{tag}'.")
 
@@ -656,7 +656,7 @@ def pca(onehot_file_path):
 
     # pca function
     dimension = 1  # the minimal dimension
-    cumulative_variance_ratio = 0       # the cumulative variance ratio
+    cumulative_variance_ratio = 0  # the cumulative variance ratio
     while True:
         print(f"Trying to reduct dimensions to {dimension}")
         pca_value = PCA(n_components=dimension)
@@ -708,7 +708,6 @@ def tsne(onehot_file_path, n_dimension, perp, learn_rate, niter, rand_state):
 
 
 def set_differences(exp_mat, set_info):
-
     # remove all the chars started with '>' in the index column
     exp_mat.index = exp_mat.index.str.lstrip('>')
 
@@ -716,7 +715,7 @@ def set_differences(exp_mat, set_info):
     print(exp_mat.head())
     print("\n" + "Input Sets Annotation Table (Partial): ")
     print(set_info.head())
-    groups = set_info["Group"].unique()             # get all groups information
+    groups = set_info["Group"].unique()  # get all groups information
 
     group_dict = dict()
     commom_res_dict = dict()
@@ -800,6 +799,27 @@ def clustering_plot(cluster_res, dataframe, fig_name):
     plt.savefig(fig_name, dpi=600)
 
 
+def plot_3d_scatter(dataframe, fig_name):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection="3d")
+
+    ax.scatter(dataframe.iloc[:, 0],
+               dataframe.iloc[:, 1],
+               dataframe.iloc[:, 2],
+               alpha=1,
+               color="grey")
+
+    # 设置坐标轴标签
+    ax.set_xlabel('C1')
+    ax.set_ylabel('C2')
+    ax.set_zlabel('C3')
+    # 使用Seaborn设置图形样式
+    sb.set(style="whitegrid")
+    # 显示图形
+    # plt.show()
+    plt.savefig(fig_name, dpi=600)
+
+
 def dbscan(dimension_mat, result_path, epsilon, minPts):
     result_path = os.path.dirname(result_path)
     three_dimension_mat = dimension_mat.iloc[:, 0:3]
@@ -825,30 +845,6 @@ def dbscan(dimension_mat, result_path, epsilon, minPts):
 
     # plotting
     clustering_plot(cluster_res=db_cluster, dataframe=three_dimension_mat, fig_name=figure_name)
-    # fig = plt.figure()
-    # ax = fig.add_subplot(111, projection='3d')
-    #
-    # # ax.set_alpha(1)
-    # for tag in np.unique(db_cluster):
-    #     temp_df = three_dimension_mat[three_dimension_mat["Label"] == tag]
-    #     ax.scatter(temp_df.iloc[:, 0],
-    #                temp_df.iloc[:, 1],
-    #                temp_df.iloc[:, 2],
-    #                alpha=1,
-    #                label=f"Class {tag}")
-    #
-    # # 设置坐标轴标签
-    # ax.set_xlabel('C1')
-    # ax.set_ylabel('C2')
-    # ax.set_zlabel('C3')
-    # # 添加图例
-    # ax.legend(loc='center left', bbox_to_anchor=(1, 0.9))
-    # # 使用Seaborn设置图形样式
-    # sb.set(style="whitegrid")
-    # # 显示图形
-    # # plt.show()
-    #
-    # plt.savefig(figure_name, dpi=600)
 
     # 计算轮廓系数
     score = metrics.silhouette_score(three_dimension_mat, db_cluster)
@@ -872,31 +868,7 @@ def optics(dimension_mat, result_path):
 
     # plotting
     clustering_plot(cluster_res=opt_cluster, dataframe=three_dimension_mat, fig_name=figure_name)
-    # fig = plt.figure()
-    # ax = fig.add_subplot(111, projection='3d')
-    #
-    # # ax.set_alpha(1)
-    # for tag in np.unique(opt_cluster):
-    #     temp_df = three_dimension_mat[three_dimension_mat["Label"] == tag]
-    #     ax.scatter(temp_df.iloc[:, 0],
-    #                temp_df.iloc[:, 1],
-    #                temp_df.iloc[:, 2],
-    #                alpha=1,
-    #                label=f"Class {tag}")
-    #
-    # # 设置坐标轴标签
-    # ax.set_xlabel('C1')
-    # ax.set_ylabel('C2')
-    # ax.set_zlabel('C3')
-    # # 添加图例
-    # ax.legend(loc='center left', bbox_to_anchor=(1, 0.9))
-    # # 使用Seaborn设置图形样式
-    # sb.set(style="whitegrid")
-    # # 显示图形
-    # # plt.show()
-    # plt.savefig(figure_name, dpi=600)
 
-    # 计算轮廓系数
     score = metrics.silhouette_score(three_dimension_mat, opt_cluster)
     print(f"Silhouette Coefficient:{score}")
 
@@ -913,31 +885,7 @@ def kmean(dimension_mat, result_path, cluster):
 
     # plotting
     clustering_plot(cluster_res=kmeans, dataframe=three_dimension_mat, fig_name=figure_name)
-    # fig = plt.figure()
-    # ax = fig.add_subplot(111, projection='3d')
-    #
-    # # ax.set_alpha(1)
-    # for tag in np.unique(kmeans):
-    #     temp_df = three_dimension_mat[three_dimension_mat["Label"] == tag]
-    #     ax.scatter(temp_df.iloc[:, 0],
-    #                temp_df.iloc[:, 1],
-    #                temp_df.iloc[:, 2],
-    #                alpha=1,
-    #                label=f"Class {tag}")
-    #
-    # # 设置坐标轴标签
-    # ax.set_xlabel('C1')
-    # ax.set_ylabel('C2')
-    # ax.set_zlabel('C3')
-    # # 添加图例
-    # ax.legend(loc='center left', bbox_to_anchor=(1, 0.9))
-    # # 使用Seaborn设置图形样式
-    # sb.set(style="whitegrid")
-    # # 显示图形
-    # # plt.show()
-    # plt.savefig(figure_name, dpi=600)
 
-    # 计算轮廓系数
     score = metrics.silhouette_score(three_dimension_mat, kmeans)
     print(f"Silhouette Coefficient:{score}")
 
@@ -954,31 +902,7 @@ def agglomerative(dimension_mat, result_path, cluster):
 
     # plotting
     clustering_plot(cluster_res=agglom, dataframe=three_dimension_mat, fig_name=figure_name)
-    # fig = plt.figure()
-    # ax = fig.add_subplot(111, projection='3d')
-    #
-    # # ax.set_alpha(1)
-    # for tag in np.unique(agglom):
-    #     temp_df = three_dimension_mat[three_dimension_mat["Label"] == tag]
-    #     ax.scatter(temp_df.iloc[:, 0],
-    #                temp_df.iloc[:, 1],
-    #                temp_df.iloc[:, 2],
-    #                alpha=1,
-    #                label=f"Class {tag}")
-    #
-    # # 设置坐标轴标签
-    # ax.set_xlabel('C1')
-    # ax.set_ylabel('C2')
-    # ax.set_zlabel('C3')
-    # # 添加图例
-    # ax.legend(loc='center left', bbox_to_anchor=(1, 0.9))
-    # # 使用Seaborn设置图形样式
-    # sb.set(style="whitegrid")
-    # # 显示图形
-    # # plt.show()
-    # plt.savefig(figure_name, dpi=600)
 
-    # 计算轮廓系数
     score = metrics.silhouette_score(three_dimension_mat, agglom)
     print(f"Silhouette Coefficient:{score}")
 
@@ -986,7 +910,7 @@ def agglomerative(dimension_mat, result_path, cluster):
 def generate_random_colors(num_colors):
     colors = []
 
-    for i in range(num_colors*2):
+    for i in range(num_colors * 2):
         # create random colors
         rgb = np.random.rand(1, 3)
         # convert format
@@ -1006,12 +930,11 @@ def polymorphism_figure(compute_polymorphism_df,
                         transparent_tag,
                         fig_width=14,
                         fig_height=9):
-
     original_df = compute_polymorphism_df
     original_list = compute_polymorphism_concise_list
 
-    polymorphism_site_list = list()                 # all polymorphism sites
-    conserve_site_list = list()                     # all conserve sites
+    polymorphism_site_list = list()  # all polymorphism sites
+    conserve_site_list = list()  # all conserve sites
 
     for item in original_list:
         new_item = item.split("\t")
@@ -1029,8 +952,8 @@ def polymorphism_figure(compute_polymorphism_df,
     seq_names_list = original_df.columns.tolist()
 
     # PLOTTING PART
-    raw_figure_width = len(polymorphism_site_list)                      # polymorphism sites number
-    raw_figure_height = len(seq_names_list)                             # sequences number
+    raw_figure_width = len(polymorphism_site_list)  # polymorphism sites number
+    raw_figure_height = len(seq_names_list)  # sequences number
 
     figure_width = fig_width
     figure_height = fig_height
@@ -1044,16 +967,16 @@ def polymorphism_figure(compute_polymorphism_df,
 
     x_axis_len = range(1, len(polymorphism_site_list) + 1)
     y_axis_len = range(1, len(seq_names_list) + 1)
-    x_axis_label = polymorphism_site_list                               # x-axis label = polymorphism sites
-    y_axis_label = seq_names_list                                       # y-axis label = sequence name
-    y_axis_label = [x.replace(">", "") for x in y_axis_label]           # delete '>' symbol in the sequence name
+    x_axis_label = polymorphism_site_list  # x-axis label = polymorphism sites
+    y_axis_label = seq_names_list  # y-axis label = sequence name
+    y_axis_label = [x.replace(">", "") for x in y_axis_label]  # delete '>' symbol in the sequence name
 
     # plot x-axis limit: 0 ~ number of polymorphism sites + 0.5
     plt.xlim(0, raw_figure_width + 1)
     # plot y-axis limit: 0.3 ~ number of sequences + 0.5
     plt.ylim(0.5, raw_figure_height + 0.5)
-    plt.xticks(x_axis_len, x_axis_label, rotation=60, size=8)           # plot x-axis label
-    plt.yticks(y_axis_len, y_axis_label, size=8)                        # plot y-axis label
+    plt.xticks(x_axis_len, x_axis_label, rotation=60, size=8)  # plot x-axis label
+    plt.yticks(y_axis_len, y_axis_label, size=8)  # plot y-axis label
 
     # conceal axis line
     ax.tick_params(bottom=True, left=False)
@@ -1066,12 +989,12 @@ def polymorphism_figure(compute_polymorphism_df,
     var_sites_list = [int(x) - 1 for x in polymorphism_site_list]
     plot_df = polymorphism_df.filter(items=var_sites_list)
 
-    rect_width, rect_height = 0.8, 1                                # tiny rectangle width and height
-    rect_x_loc, rect_y_loc = 0.6, 0.5                               # tiny rectangle initial location
-    text_width, text_height = 1, 1                                  # amino acid text gap
-    text_x_loc, text_y_loc = 1, 1                                   # amino acid initial location
-    bg_rect_x, bg_rect_y = 0.2, 0.5                                 # background rectangle x and y  initial location
-    bg_rect_width, bg_rect_height = raw_figure_width + 0.8, 1       # background rectangle width and height
+    rect_width, rect_height = 0.8, 1  # tiny rectangle width and height
+    rect_x_loc, rect_y_loc = 0.6, 0.5  # tiny rectangle initial location
+    text_width, text_height = 1, 1  # amino acid text gap
+    text_x_loc, text_y_loc = 1, 1  # amino acid initial location
+    bg_rect_x, bg_rect_y = 0.2, 0.5  # background rectangle x and y  initial location
+    bg_rect_width, bg_rect_height = raw_figure_width + 0.8, 1  # background rectangle width and height
 
     # plot background rectangle
     bg_color_list = cycle(["#E8E8E8", "#FFFFFF"])
@@ -1080,7 +1003,6 @@ def polymorphism_figure(compute_polymorphism_df,
         return next(bg_color_list)
 
     for n in seq_names_list:
-
         ax.add_patch(patches.Rectangle((bg_rect_x, bg_rect_y),
                                        bg_rect_width,
                                        bg_rect_height,
@@ -1093,10 +1015,9 @@ def polymorphism_figure(compute_polymorphism_df,
 
     # cycle each row
     for row_index, row_value in plot_df.iterrows():
-        plot_text_list = row_value.tolist()                         # format:["A", "T", "M", "P"...]
+        plot_text_list = row_value.tolist()  # format:["A", "T", "M", "P"...]
 
         for aa in plot_text_list:
-
             ax.add_patch(patches.Rectangle((rect_x_loc, rect_y_loc),
                                            rect_width,
                                            rect_height,
@@ -1127,7 +1048,6 @@ def ic_scatter_figure(shannon_ic_df,
                       fig_width=10,
                       fig_height=8,
                       ):
-
     # x-axis & y-axis information
     x_info = shannon_ic_df.iloc[:, 0]
     y_info = shannon_ic_df.iloc[:, 1]
@@ -1187,7 +1107,6 @@ def cluster_figure(dr_result,
                    tp_tag,
                    fig_width,
                    fig_height):
-
     pc_1 = dr_result.iloc[:, 0]
     pc_2 = dr_result.iloc[:, 1]
     virus_info = dr_result.iloc[:, -1]

@@ -152,7 +152,8 @@ def starts():
                                    help="Agglomerative")
         cluster_group.add_argument("-nc", "--n_cluster", type=int, metavar="", dest="nc",
                                    help="the number of cluster in K_Mean and Agglomerative")
-
+        cluster_group.add_argument("-pts", "--plot_3d_scatter", action="store_true", dest="pts",
+                                   help="plot three-dimension scatter of input data")
 
         # output options
         output_group = parser.add_argument_group("Output Options")
@@ -212,22 +213,10 @@ def starts():
 
     # '-i' parameter
     if my_args.input:
-        if my_args.shannon:
+        if any([my_args.shannon, my_args.one_hot, my_args.pca, my_args.tsne, my_args.dbscan, my_args.optics,
+                my_args.kmean, my_args.agglo, my_args.pts]):
             pass
-        elif my_args.one_hot:
-            pass
-        elif my_args.pca:
-            pass
-        elif my_args.tsne:
-            pass
-        elif my_args.dbscan:
-            pass
-        elif my_args.optics:
-            pass
-        elif my_args.kmean:
-            pass
-        elif my_args.agglo:
-            pass
+
         else:
             if os.path.isdir(my_args.input):                                # input is a folder
                 print(Fore.RED + "Error!The folder is currently not supported!")
@@ -590,6 +579,22 @@ def starts():
                                 color_tag=palette)
 
             print("\n" + "NOTE: Plotting Completed!")
+
+    if my_args.pts:
+        result_dir = os.path.dirname(my_args.input)
+        figure_name = os.path.join(result_dir, "3d-scatter.pdf")
+
+        file_type = func.file_type_judge(my_args.input)
+        # determine the file type
+        if file_type == "CSV":
+            raw_df = pd.read_csv(my_args.input, header=0, index_col=0)
+        elif file_type == "XLSX":
+            raw_df = pd.read_excel(my_args.input, header=0)
+        else:
+            print(Fore.RED + "ERROR! The file type:%s is not supported right now!" % file_type)
+            sys.exit()
+
+        func.plot_3d_scatter(dataframe=raw_df, fig_name=figure_name)
 
     if my_args.dbscan:
         print("NOTE: Activating DBSCAN(Density-Based Spatial Clustering of Applications with Noise)")
