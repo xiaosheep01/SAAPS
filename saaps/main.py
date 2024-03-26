@@ -36,7 +36,7 @@ def starts():
     print(
         "{}>>> {}Description: Count SAP in protein alignment sequences".format(Fore.GREEN, Fore.RESET))
 
-    print("{}>>> {}Version: 1.3.1 (2024-03-06)".format(Fore.GREEN, Fore.RESET))
+    print("{}>>> {}Version: 1.4.1 (2024-03-26)".format(Fore.GREEN, Fore.RESET))
 
     print("{}>>> {}Author: Yang Xiao".format(Fore.GREEN, Fore.RESET))
 
