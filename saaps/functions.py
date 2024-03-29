@@ -639,6 +639,10 @@ def one_hot_encoding(seq_matrix, site_list):
     return raw_aa_mat, filtered_matrix, expand_matrix, site_matrix
 
 
+def AAindex_encoding(seq_matrix, site_list):
+    pass
+
+
 def pca(onehot_file_path):
     """
     Dimension reduction by principal component analysis
