@@ -1,5 +1,5 @@
 # SAAPS
-Single Amino Acids Polylimorphism Statistics (SAAPS) is a Python3-based character interface program that can be used and deployed on multiple systems, including Windows, Linux, and MacOS. The software is mainly used to quickly calculate single amino acid polymorphism (SAP), Shannon information entropy at each site of the sequence, and to analyze sequence features and cluster analysis by using Onehot encoding and dimensionality reduction algorithms.
+Single Amino Acids Polymorphism Statistics (SAAPS) is a Python3-based character interface program that can be used and deployed on multiple systems, including Windows, Linux, and MacOS. The software is mainly used to quickly calculate single amino acid polymorphism (SAP), Shannon information entropy at each site of the sequence, and to analyze sequence features and cluster analysis by using Onehot encoding and dimensionality reduction algorithms.
 
 The raw input file of the SAAPS software is very simple, as long as the sequence file after alignment (nucleotide or amino acid), it can be used for processing and analysis. The main workflow of SAAPS is as follows: Firstly, by analyzing the characteristics of each sequence, the SAPs and Shannon information entropy of each point are calculated, and the corresponding result figures can be drawn at the same time. Then SAAPS screens the key sites according to the specified information entropy range, and transforms them into quantificable data by using Onehot encoding. Finally, the certain dimensionality reduction algorithm (PCA or t-SNE) is used to calculate the similarity level between sequences and draw the clustering scatter plot.
 
@@ -51,7 +51,7 @@ Parameter | Description
 -fh, --figure_height | the height of figure
 -fname, --figure_name | the name of figure
 -c, --color | the palette of figure
--pac, --print_all_colors | print all sipported palettes
+-pac, --print_all_colors | print all supported palettes
 -dpi, --DPI | the dpi of the figure
 -fm, --figure_format | the format of figure
 -tp, --transparent | make the background of the figure transparent
@@ -104,7 +104,7 @@ Before the subsequent analysis, it is usually necessary to format the sequence, 
 saaps -i your/seq/path -osn -o your/output/path
 ```  
 
-**Code explaination**: `-i your/seq/path` indicates that the matched sequence file is passed. `-osn` indicates the sequence name in the output sequence file. By default, the output is in a `.csv` table. `-o your/output/path` indicates the output path. If this parameter is not specified, the result will be output in the default path.After the program is executed, a file named `SeqName.csv` will be generated, which can be used for users to modify the sequence names individually. It is recommended to save the modified new names in the second column, so that subsequent programs can modify the sequence names in batches. The format of the file is as follows:  
+**Code explanation**: `-i your/seq/path` indicates that the matched sequence file is passed. `-osn` indicates the sequence name in the output sequence file. By default, the output is in a `.csv` table. `-o your/output/path` indicates the output path. If this parameter is not specified, the result will be output in the default path.After the program is executed, a file named `SeqName.csv` will be generated, which can be used for users to modify the sequence names individually. It is recommended to save the modified new names in the second column, so that subsequent programs can modify the sequence names in batches. The format of the file is as follows:  
 
 |Old_Name||
 |---|---|
@@ -117,7 +117,7 @@ saaps -i your/seq/path -osn -o your/output/path
 ```
 saaps -i your/seq/path -csn your/names/file/path -o your/output/path
 ```
-**Code explaination**:In this step, `-csn your/names/file/path` represents the matching table of the old and new names in the sequence, which is the table output in the previous step. The pairing table format for the sequence names is as follows:  
+**Code explanation**:In this step, `-csn your/names/file/path` represents the matching table of the old and new names in the sequence, which is the table output in the previous step. The pairing table format for the sequence names is as follows:  
 
 |Old_Name|New_Name|
 |---|---|
@@ -140,7 +140,7 @@ Although SAAPS was developed only for the analysis of SAP, the basis of polymorp
 saaps -i your/seq/path -cp -pp -o your/output/path
 ```
 
-**Code explaination**:`-csn your/names/file/path` represents the matching table of the old and new names in the sequence, which is the table output in the previous step. `-cp` represents to activate the computational polymorphism function. `-pp` represents that the polymorphism result is plotted.
+**Code explanation**:`-csn your/names/file/path` represents the matching table of the old and new names in the sequence, which is the table output in the previous step. `-cp` represents to activate the computational polymorphism function. `-pp` represents that the polymorphism result is plotted.
 
 The statistical result of polymorphism analysis will generate three files named `Concise_Result.txt`, `Detail_Result.txt`, and `Seq_Matrix.csv`. If the drawing parameter (`-pp`) is set, A resulting graph (default) named `SAPs.pdf` is generated accordingly. The main result files are explained as follows:  
 
@@ -180,7 +180,7 @@ In the SAAPS calculation results, information content (IC value) is used to repl
 saaps -i your/Concise/result/path -sha -pic -o your/output/path
 ```
 
-**Code explaination:** When calculating information entropy, we need to pass the `Concise_Result.txt` file in the previous step of polymorphism analysis, `-sha` means to activate the information entropy calculation function, `-pic` means to draw the information entropy result, and a picture file named `IC-Plot.pdf` is generated in the output path by default.  
+**Code explanation:** When calculating information entropy, we need to pass the `Concise_Result.txt` file in the previous step of polymorphism analysis, `-sha` means to activate the information entropy calculation function, `-pic` means to draw the information entropy result, and a picture file named `IC-Plot.pdf` is generated in the output path by default.  
 
 **Shannon_log.txt**: indicates the simple statistical result of IC analysis. The contents of the document are as follows (part) :  
 
@@ -211,7 +211,7 @@ mean  3.8647165333333335
 saaps -i your/Seq/Matrix/path -sr your/IC/Result/path -smin ICmin -smax ICmax -o your/output/path
 ```
 
-**Code explaination**:During the Onehot encoding process, the `Seq_Matrix.csv` file from the polymorphism analysis in the previous step and the `Shannon_IC_Result.csv` file from the information entropy calculation need to be passed in. If only the sites within the threshold range need to be converted, You can use `-smin` and `-smax` to set the IC threshold range. In the Onehot encoding step, the software automatically generates 4 files: `OneHot-Original.csv`, `One-Hot-ConciseMatrix.csv`, `OneHot-Transform.csv`, and `One-Hot-ForIntersect.csv`.
+**Code explanation**:During the Onehot encoding process, the `Seq_Matrix.csv` file from the polymorphism analysis in the previous step and the `Shannon_IC_Result.csv` file from the information entropy calculation need to be passed in. If only the sites within the threshold range need to be converted, You can use `-smin` and `-smax` to set the IC threshold range. In the Onehot encoding step, the software automatically generates 4 files: `OneHot-Original.csv`, `One-Hot-ConciseMatrix.csv`, `OneHot-Transform.csv`, and `One-Hot-ForIntersect.csv`.
 
 **OneHot-Original.csv**: a table of polymorphic loci selected according to the IC threshold range and used for onehot encoding. The file content is shown as follows (part) :
 
@@ -254,7 +254,7 @@ The function of Onehot encoding is to convert classified data into numerical dat
 saaps -i your/Transform/result/path -pca -pc -o your/output/path
 ```
 
-**Code explaination**:In the process of dimensionality reduction analysis, the `OneHot-Transform.csv` file in the previous step needs to be passed in; `-pca` indicates that the PCA dimensionality reduction function is activated. `-pc` means to draw a scatter plot based on the dimensionality reduction results. This process produces two result files called `PCA.csv` and `PCA-Plot.pdf`.
+**Code explanation**:In the process of dimensionality reduction analysis, the `OneHot-Transform.csv` file in the previous step needs to be passed in; `-pca` indicates that the PCA dimensionality reduction function is activated. `-pc` means to draw a scatter plot based on the dimensionality reduction results. This process produces two result files called `PCA.csv` and `PCA-Plot.pdf`.
 
 **PCA.csv**: PCA calculation result of sequence file. The contents of the document are as follows (part) :
 
