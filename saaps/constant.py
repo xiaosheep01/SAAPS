@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Development Time: 2024-02-27 14:06:38
 # Developer: XiaoYang
+import os.path
 
 # DNA codon translation table
 translate_table = {
@@ -77,9 +78,3 @@ palettes = ["Accent", "Blues/Blues_r/Blues_d", "BrBG/BrBg_r", "BuGn/BuBn_r", "Bu
             "terrain/terrain_r", "twilight/twilight_r", "twilight_shifted/twilight_shifted_r", "viridis/viridis_r",
             "vlag/vlag_r", "winter/winter_r"]
 
-
-# AAindex Dictionary
-def obtain_AAindex(file_path):
-    aaindex_dict = {}
-    return aaindex_dict
-    pass

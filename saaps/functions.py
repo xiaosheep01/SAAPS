@@ -580,7 +580,6 @@ def one_hot_encoding(seq_matrix, site_list):
     :return: a dataframe
     """
     filtered_matrix = seq_matrix.iloc[site_list]
-    # print(filtered_matrix.head())
 
     tag = "type1"  # type1 is default
     if "?" in filtered_matrix.values and "-" in filtered_matrix.values:  # both "?" and "-"
@@ -639,8 +638,112 @@ def one_hot_encoding(seq_matrix, site_list):
     return raw_aa_mat, filtered_matrix, expand_matrix, site_matrix
 
 
-def AAindex_encoding(seq_matrix, site_list):
-    pass
+def obtain_aaindex():
+    print("NOTE: Reading AAindex File!")
+    aaindex_path = os.path.dirname(__file__) + os.sep + "aaindex1_20170213"
+    raw_data = read_file(aaindex_path)
+    raw_data = [x.strip() for x in raw_data if x.strip() != ""]
+
+    total_loc = []
+    for num, item in enumerate(raw_data):
+        if item.startswith("H "):
+            total_loc.append(num)
+        if item.startswith("//"):
+            total_loc.append(num)
+
+    print(f"NOTE: The number of amino acids properties: {len(total_loc) / 2}")
+    accession_value_dict = {}
+    for n in range(0, len(total_loc), 2):
+        n_loc = total_loc[n]
+        aa1_loc = total_loc[n+1] - 2
+        aa2_loc = total_loc[n+1] - 1
+
+        accession = raw_data[n_loc].split(" ")[1]               # N_line
+
+        # aa values
+        aa1_value_info = re.sub(r"\s+", "\t", raw_data[aa1_loc])
+        aa2_value_info = re.sub(r"\s+", "\t", raw_data[aa2_loc])
+        aa1_value_info = aa1_value_info.split("\t")
+        aa2_value_info = aa2_value_info.split("\t")
+        aa_value_info = aa1_value_info + aa2_value_info
+
+        accession_value_dict[accession] = aa_value_info
+
+    aaindex_df = pd.DataFrame(accession_value_dict)
+    new_index = ["A", "R", "N", "D", "C", "Q", "E", "G", "H", "I",
+                 "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V"]
+    aaindex_df.index = new_index
+
+    # delete columns containing "NA"
+    aaindex_df_clean = aaindex_df.drop(columns=aaindex_df.columns[aaindex_df.isin(['NA']).any()])
+    aaindex_df_clean = aaindex_df_clean.astype(float)
+    aaindex_df_T = aaindex_df_clean.transpose()
+
+    print(f"NOTE: Valid Dimensions:{len(aaindex_df_T)}, Invalid Dimensions:{int(len(total_loc) / 2 - len(aaindex_df_T))}")
+
+    # Testing Part
+    if __name__ == "__main__":
+        print("\n" + f"{Fore.LIGHTYELLOW_EX}WeakWarning: Following is testing part!{Fore.RESET}")
+        test_aa_csv = os.path.dirname(__file__) + os.sep + "tempAAindex.csv"
+        aaindex_df_T.to_csv(test_aa_csv)
+        print("AAindex cleaned dataframe is following:")
+        print(aaindex_df_T.head())
+        print(f"{Fore.LIGHTYELLOW_EX}Testing Part Ends{Fore.RESET}" + "\n")
+
+    # convert to a dictionary
+    aaindex_dict = aaindex_df_T.to_dict(orient="list")
+
+    return aaindex_dict, aaindex_df_T
+
+
+def aaindex_encoding(seq_matrix, site_list):
+    filtered_matrix = seq_matrix.iloc[site_list]
+
+    # judge sequence quality
+    if any(["?" in filtered_matrix.values, "-" in filtered_matrix.values]):
+        print(f"{Fore.RED}ERROR: AAindex encoding is only applied in sequence without illegal icons!")
+        sys.exit()
+
+    else:  # not '?' or '-'
+        tag = "type1"
+        print(f"NOTE: Sequences contain no illegal icon, IC tag is '{tag}'.")
+
+    raw_aa_mat = filtered_matrix.transpose()
+    raw_aa_mat.columns = [int(col) + 1 for col in raw_aa_mat.columns.tolist()]
+
+    # AAindex dictionary
+    my_aaindex_dict, my_aaindex_csv = obtain_aaindex()
+    valid_properties = len(my_aaindex_csv)
+
+    # replace the values according to the AAindex dictionary
+    def transform_element(value):
+        return my_aaindex_dict[value]
+
+    filtered_matrix = filtered_matrix.applymap(transform_element)
+    filtered_matrix = filtered_matrix.transpose()
+
+    old_columns = filtered_matrix.columns.tolist()
+    new_columns = [int(col) + 1 for col in old_columns]
+    filtered_matrix.columns = new_columns
+
+    # expand matrix
+    # expand the dimension of each column
+    expand_matrix = pd.DataFrame()
+    for col in filtered_matrix.columns.tolist():
+        col_list = filtered_matrix[col].tolist()
+        # The range will automatically change according to the number of valid AAindex properties
+        temp_df = pd.DataFrame(col_list,
+                               columns=[str(col) + "_%s" % str(i + 1) for i in range(valid_properties)])
+        expand_matrix = pd.concat([expand_matrix, temp_df], axis=1)
+
+    expand_matrix.index = filtered_matrix.index
+
+    # site matrix
+    site_matrix = pd.DataFrame()
+    for column in raw_aa_mat.columns:
+        site_matrix[column] = raw_aa_mat[column].apply(lambda x: f'{column}{x}')
+
+    return raw_aa_mat, filtered_matrix, expand_matrix, site_matrix
 
 
 def pca(onehot_file_path):
@@ -1178,3 +1281,8 @@ def output_palettes():
     print("Random_2: 'Randomly select one of all the palettes supported by the system'")
     for palette in ct.palettes:
         print(palette)
+
+
+# Testing Part
+if __name__ == "__main__":
+    obtain_aaindex()

@@ -117,6 +117,8 @@ def starts():
         dr_group = parser.add_argument_group("Dimension Reduction Options")
         dr_group.add_argument("-oh", "--onehot", action="store_true", dest="one_hot",
                               help="One-Hot Encoding")
+        dr_group.add_argument("-aaindex", "--AAindex", action="store_true", dest="aaindex",
+                              help="AAindex Encoding")
         dr_group.add_argument("-pca", "--PCA", action="store_true", dest="pca",
                               help="Dimensionality reduction by PCA, "
                                    "please input the OneHot matrix from the '-oh' parameter")
@@ -214,7 +216,7 @@ def starts():
     # '-i' parameter
     if my_args.input:
         if any([my_args.shannon, my_args.one_hot, my_args.pca, my_args.tsne, my_args.dbscan, my_args.optics,
-                my_args.kmean, my_args.agglo, my_args.pts]):
+                my_args.kmean, my_args.agglo, my_args.pts, my_args.aaindex]):
             pass
 
         else:
@@ -422,6 +424,7 @@ def starts():
     # '-oh' parameter
     # one-hot coding
     if my_args.one_hot:
+        print("NOTE: Activating OneHot Encoding!")
         file_type = func.file_type_judge(my_args.input)
 
         if file_type == "CSV":
@@ -443,6 +446,31 @@ def starts():
         onehot_matrix_concise.to_csv(onehot_result_path + "OneHot-ConciseMatrix.csv", index=True, sep=",", header=True)
         onehot_matrix.to_csv(onehot_result_path + "OneHot-Transform.csv", index=True, sep=",", header=True)
         site_matrix.to_csv(onehot_result_path + "OneHot-ForIntersect.csv", index=True, sep=",", header=True)
+        print("NOTE: OneHot Encoding Completed!")
+
+    if my_args.aaindex:
+        print("NOTE: Activating AAindex Encoding!")
+        file_type = func.file_type_judge(my_args.input)
+
+        if file_type == "CSV":
+            seq_mat = pd.read_csv(my_args.input, header=0)
+        elif file_type == "XLSX":
+            seq_mat = pd.read_excel(my_args.input, header=0)
+        else:
+            print(Fore.RED + "ERROR! The file type:%s is not supported right now!" % file_type)
+            sys.exit()
+
+        # index starts from 0, so the value in key_sites need to minus 1
+        key_sites = [int(x)-1 for x in key_sites]
+        # filter the seq matrix
+        raw_aa_matrix, AAindex_matrix_concise, AAindex_matrix, site_matrix = func.aaindex_encoding(seq_mat, key_sites)
+        AAindex_result_path = result_path + os.sep + output_prefix
+
+        raw_aa_matrix.to_csv(AAindex_result_path + "AAindex-Original.csv", index=True, sep=",", header=True)
+        AAindex_matrix_concise.to_csv(AAindex_result_path + "AAindex-ConciseMatrix.csv", index=True, sep=",", header=True)
+        AAindex_matrix.to_csv(AAindex_result_path + "AAindex-Transform.csv", index=True, sep=",", header=True)
+        site_matrix.to_csv(AAindex_result_path + "AAindex-ForIntersect.csv", index=True, sep=",", header=True)
+        print("NOTE: AAindex Encoding Completed!")
 
     # '-pca' parameter
     # dimension reduction
