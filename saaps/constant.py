@@ -78,3 +78,18 @@ palettes = ["Accent", "Blues/Blues_r/Blues_d", "BrBG/BrBg_r", "BuGn/BuBn_r", "Bu
             "terrain/terrain_r", "twilight/twilight_r", "twilight_shifted/twilight_shifted_r", "viridis/viridis_r",
             "vlag/vlag_r", "winter/winter_r"]
 
+# test palette for 25 colors
+test_palette = ["#1E90FF", "#7B68EE", "#66CDAA", "#00CD66",
+              "#98FB98", "#EEDC82", "#FFC125", "#FF6A6A",
+              "#FFA07A", "#EE82EE", "#FF7F00", "#CD2626",
+              "#EE00EE", "#87CEEB", "#9B30FF", "#008B8B",
+              "#EEEE00", "#CDB5CD", "#CAFF70", "#FF69B4",
+              "#6495ED", "#2E8B57", "#66CD00", "#A0522D",
+              "#B03060"]
+
+# test palette for 20 colors
+test_palette2 = ["#1E90FF", "#7B68EE", "#66CDAA", "#00CD66",
+              "#98FB98", "#EEDC82", "#FFC125", "#FF6A6A",
+              "#FFA07A", "#EE82EE", "#FF7F00", "#CD2626",
+              "#EE00EE", "#87CEEB", "#9B30FF", "#008B8B",
+              "#EEEE00", "#CDB5CD", "#CAFF70", "#FF69B4"]

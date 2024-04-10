@@ -13,14 +13,15 @@ from typing import Any
 
 from sklearn import metrics
 from sklearn.cluster import DBSCAN, OPTICS, KMeans, AgglomerativeClustering
+from sklearn.ensemble import RandomTreesEmbedding
 from sklearn.neighbors import NearestNeighbors
 
 import constant as ct
 from matplotlib import pyplot as plt, patches
 import matplotlib.colors as mcolors
 import seaborn as sb
-from sklearn.decomposition import PCA
-from sklearn.manifold import TSNE
+from sklearn.decomposition import PCA, KernelPCA, TruncatedSVD
+from sklearn.manifold import TSNE, Isomap, SpectralEmbedding, LocallyLinearEmbedding
 from sklearn.preprocessing import OneHotEncoder
 import numpy as np
 import pandas as pd
@@ -790,7 +791,7 @@ def pca(onehot_file_path):
     return new_data
 
 
-def tsne(onehot_file_path, n_dimension, perp, learn_rate, niter, rand_state):
+def tsne(onehot_file_path, n_dimension, perp, learn_rate, niter):
     filetype = file_type_judge(onehot_file_path)
     if filetype == "CSV":
         onehot_mat = pd.read_csv(onehot_file_path, header=0, index_col=0)
@@ -803,8 +804,7 @@ def tsne(onehot_file_path, n_dimension, perp, learn_rate, niter, rand_state):
     t_sne = TSNE(n_components=n_dimension,
                  perplexity=perp,
                  learning_rate=learn_rate,
-                 n_iter=niter,
-                 random_state=rand_state)
+                 n_iter=niter)
 
     tsne_data = t_sne.fit_transform(onehot_mat)
     tsne_data = pd.DataFrame(tsne_data)
@@ -812,6 +812,104 @@ def tsne(onehot_file_path, n_dimension, perp, learn_rate, niter, rand_state):
     print("NOTE: The t_SNE scores (Partial):", tsne_data.head(), sep="\n")
 
     return tsne_data
+
+
+def isomapping(onehot_file_path, n_dimension):
+    filetype = file_type_judge(onehot_file_path)
+    if filetype == "CSV":
+        onehot_mat = pd.read_csv(onehot_file_path, header=0, index_col=0)
+    elif filetype == "XLSX":
+        onehot_mat = pd.read_excel(onehot_file_path, header=0, index_col=0)
+    else:
+        print(Fore.RED + "ERROR! The file type:%s is not supported right now!" % filetype)
+        sys.exit()
+
+    isomap = Isomap(n_components=n_dimension)
+    isomap_data = isomap.fit_transform(onehot_mat)
+    isomap_data = pd.DataFrame(isomap_data)
+    isomap_data.index = onehot_mat.index
+    print("NOTE: The isomap scores (Partial):", isomap_data.head(), sep="\n")
+    return isomap_data
+
+
+def spectremb(onehot_file_path, n_dimension):
+    filetype = file_type_judge(onehot_file_path)
+    if filetype == "CSV":
+        onehot_mat = pd.read_csv(onehot_file_path, header=0, index_col=0)
+    elif filetype == "XLSX":
+        onehot_mat = pd.read_excel(onehot_file_path, header=0, index_col=0)
+    else:
+        print(Fore.RED + "ERROR! The file type:%s is not supported right now!" % filetype)
+        sys.exit()
+
+    spectremb = SpectralEmbedding(n_components=n_dimension, n_neighbors=3)
+    spectremb_data = spectremb.fit_transform(onehot_mat)
+    spectremb_data = pd.DataFrame(spectremb_data)
+    spectremb_data.index = onehot_mat.index
+    print("NOTE: The spectremb scores (Partial):", spectremb_data.head(), sep="\n")
+    return spectremb_data
+
+
+def my_lle(onehot_file_path, n_dimension):
+    filetype = file_type_judge(onehot_file_path)
+    if filetype == "CSV":
+        onehot_mat = pd.read_csv(onehot_file_path, header=0, index_col=0)
+    elif filetype == "XLSX":
+        onehot_mat = pd.read_excel(onehot_file_path, header=0, index_col=0)
+    else:
+        print(Fore.RED + "ERROR! The file type:%s is not supported right now!" % filetype)
+        sys.exit()
+
+    lle = LocallyLinearEmbedding(n_components=n_dimension, n_neighbors=3)
+    lle_data = lle.fit_transform(onehot_mat)
+    lle_data = pd.DataFrame(lle_data)
+    lle_data.index = onehot_mat.index
+    print("NOTE: The LLE scores (Partial):", lle_data.head(), sep="\n")
+    return lle_data
+
+
+def kernelPCA(onehot_file_path, n_dimension):
+    filetype = file_type_judge(onehot_file_path)
+    if filetype == "CSV":
+        onehot_mat = pd.read_csv(onehot_file_path, header=0, index_col=0)
+    elif filetype == "XLSX":
+        onehot_mat = pd.read_excel(onehot_file_path, header=0, index_col=0)
+    else:
+        print(Fore.RED + "ERROR! The file type:%s is not supported right now!" % filetype)
+        sys.exit()
+
+    kPCA = KernelPCA(n_components=n_dimension, kernel="rbf", gamma=15)
+    kPCA_data = kPCA.fit_transform(onehot_mat)
+    kPCA_data = pd.DataFrame(kPCA_data)
+    kPCA_data.index = onehot_mat.index
+    print("NOTE: The LLE scores (Partial):", kPCA_data.head(), sep="\n")
+    return kPCA_data
+
+
+def randomForest_PCA(onehot_file_path, n_dimension):
+    filetype = file_type_judge(onehot_file_path)
+    if filetype == "CSV":
+        onehot_mat = pd.read_csv(onehot_file_path, header=0, index_col=0)
+    elif filetype == "XLSX":
+        onehot_mat = pd.read_excel(onehot_file_path, header=0, index_col=0)
+    else:
+        print(Fore.RED + "ERROR! The file type:%s is not supported right now!" % filetype)
+        sys.exit()
+
+    # Random Forest
+    rf = RandomTreesEmbedding(n_estimators=1000, min_samples_leaf=1, min_samples_split=1.0, sparse_output=False)
+    rf_data = rf.fit_transform(onehot_mat)
+    # rf_data = pd.DataFrame(rf_data)
+    # rf_data.index = onehot_mat.index
+    # print("NOTE: The Random Forest data (Partial):", rf_data.head(), sep="\n")
+
+    # PCA
+    rfp = PCA(n_components=n_dimension)
+    rfp_data = rfp.fit_transform(rf_data)
+    rfp_data = pd.DataFrame(rfp_data)
+    rfp_data.index = onehot_mat.index
+    print("NOTE: The Random Forest data (Partial):", rfp_data.head(), sep="\n")
+    return rfp_data
 
 
 def set_differences(exp_mat, set_info):
@@ -899,6 +997,29 @@ def clustering_plot(cluster_res, dataframe, fig_name):
     ax.set_zlabel('C3')
     # 添加图例
     ax.legend(loc='center left', bbox_to_anchor=(1, 0.9))
+    # 使用Seaborn设置图形样式
+    sb.set(style="whitegrid")
+    # 显示图形
+    # plt.show()
+    plt.savefig(fig_name, dpi=600)
+
+
+def clustering_plot2(dataframe, fig_name):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection="3d")
+
+    ax.scatter(dataframe.iloc[:, 0],
+               dataframe.iloc[:, 1],
+               dataframe.iloc[:, 2],
+               color=ct.test_palette2,
+               alpha=1)
+
+    # 设置坐标轴标签
+    ax.set_xlabel('C1')
+    ax.set_ylabel('C2')
+    ax.set_zlabel('C3')
+    # 添加图例
+    # ax.legend(loc='center left', bbox_to_anchor=(1, 0.9))
     # 使用Seaborn设置图形样式
     sb.set(style="whitegrid")
     # 显示图形

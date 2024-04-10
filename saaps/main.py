@@ -125,6 +125,21 @@ def starts():
         dr_group.add_argument("-tsne", "--TSNE", action="store_true", dest="tsne",
                               help="Dimensionality reduction by t-SNE, "
                                    "please input the OneHot matrix from the '-oh' parameter")
+        dr_group.add_argument("-isomap", "--ISOMAP", action="store_true", dest="isomap",
+                              help="Dimensionality reduction by Isomap, "
+                                   "please input the OneHot matrix from the '-oh' parameter")
+        dr_group.add_argument("-spectremb", "--SPECTREMB", action="store_true", dest="spectremb",
+                              help="Dimensionality reduction by Spectremb, "
+                                   "please input the OneHot matrix from the '-oh' parameter")
+        dr_group.add_argument("-lle", "--LLE", action="store_true", dest="lle",
+                              help="Dimensionality reduction by LLE, "
+                                   "please input the OneHot matrix from the '-oh' parameter")
+        dr_group.add_argument("-kpca", "--kernel_PCA", action="store_true", dest="kpca",
+                              help="Dimensionality reduction by Kernel PCA, "
+                                   "please input the OneHot matrix from the '-oh' parameter")
+        dr_group.add_argument("-rfp", "--RandomForest_PCA", action="store_true", dest="rfp",
+                              help="Dimensionality reduction by Kernel RandomForest and PCA, "
+                                   "please input the OneHot matrix from the '-oh' parameter")
         dr_group.add_argument("-td", "--tSNE_dimension", type=int, metavar="", dest="td",
                               help="The dimension in t_SNE, default is 2")
         dr_group.add_argument("-tpp", "--tSNE_perplexity", type=int, metavar="", dest="tpp",
@@ -137,6 +152,8 @@ def starts():
                               help="The random state in t_SNE, default is 1")
         dr_group.add_argument("-pc", "--plot_cluster", action="store_true", dest="pc",
                               help="Plot clustering scatter plot according to the result of dimensionality reduction")
+        dr_group.add_argument("-pc2", "--plot_cluster2", action="store_true", dest="pc2",
+                              help="test plotting")
 
         # Clustering Options
         cluster_group = parser.add_argument_group("Clustering Options")
@@ -216,7 +233,8 @@ def starts():
     # '-i' parameter
     if my_args.input:
         if any([my_args.shannon, my_args.one_hot, my_args.pca, my_args.tsne, my_args.dbscan, my_args.optics,
-                my_args.kmean, my_args.agglo, my_args.pts, my_args.aaindex]):
+                my_args.kmean, my_args.agglo, my_args.pts, my_args.aaindex, my_args.isomap, my_args.spectremb,
+                my_args.lle, my_args.kpca, my_args.rfp]):
             pass
 
         else:
@@ -533,7 +551,7 @@ def starts():
         perplexity = 3
         learning_rate = 200
         n_iter = 5000
-        random_state = 1
+        # random_state = 1
 
         # tSNE parameters
         if my_args.td:
@@ -551,15 +569,13 @@ def starts():
         print(f"Dimension:{dimension}, "
               f"Perplexity: {perplexity}, "
               f"Learning Rate: {learning_rate}, "
-              f"n_iter: {n_iter}, "
-              f"Random State: {random_state}")
+              f"n_iter: {n_iter}, ")
 
         tsne_result = func.tsne(my_args.input,
                                 n_dimension=dimension,
                                 perp=perplexity,
                                 learn_rate=learning_rate,
-                                niter=n_iter,
-                                rand_state=random_state)
+                                niter=n_iter)
 
         tsne_result_path = result_path + os.sep + output_prefix + "tSNE.csv"
         tsne_result.to_csv(tsne_result_path)
@@ -568,7 +584,7 @@ def starts():
         # PLOTTING
         if my_args.pc:
             # Plot Scatter
-            print(f"NOTE: Activating PCA Plotting function!")
+            print(f"NOTE: Activating tSNE Plotting function!")
             tsne_result["Virus"] = tsne_result.index
             scatter_label = False
             figure_format = "pdf"
@@ -607,6 +623,355 @@ def starts():
                                 color_tag=palette)
 
             print("\n" + "NOTE: Plotting Completed!")
+
+        if my_args.pc2:
+            print(f"{Fore.LIGHTYELLOW_EX}NOTE: Testing Part Start{Fore.RESET}")
+            figure_name = result_path + os.sep + output_prefix + "tSNE-Plot" + ".pdf"
+            func.clustering_plot2(tsne_result, fig_name=figure_name)
+
+            print(f"{Fore.LIGHTYELLOW_EX}NOTE: Testing Part Ends{Fore.RESET}")
+
+    # '-isomap' parameter
+    # dimension reduction
+    if my_args.isomap:
+        print("NOTE: Activating Isomap function!")
+        # isomap default parameters
+        dimension = 2
+
+        # isomap parameters
+        if my_args.td:
+            dimension = my_args.td
+
+        print("\n" + "Isomap Parameters:")
+        print(f"Dimension:{dimension}")
+
+        iso_result = func.isomapping(my_args.input, n_dimension=dimension)
+
+        iso_result_path = result_path + os.sep + output_prefix + "isomap.csv"
+        iso_result.to_csv(iso_result_path)
+        print("NOTE: Isomap Completed!")
+
+        # PLOTTING
+        if my_args.pc:
+            # Plot Scatter
+            print(f"NOTE: Activating PCA Plotting function!")
+            iso_result["Virus"] = iso_result.index
+            scatter_label = False
+            figure_format = "pdf"
+            if my_args.format:
+                figure_format = my_args.format
+
+            figure_name = result_path + os.sep + output_prefix + "Isomap-Plot" + "." + figure_format
+            dpi = 300
+            transparent = False
+            figure_width = 8
+            figure_height = 6
+            palette = "RdYlBu"
+
+            if my_args.fname:
+                figure_name = result_path + os.sep + output_prefix + my_args.fname + "." + figure_format
+            if my_args.dpi:
+                dpi = my_args.dpi
+            if my_args.tp:
+                transparent = True
+            if my_args.fw:
+                figure_width = my_args.fw
+            if my_args.fh:
+                figure_height = my_args.fh
+            if my_args.sl:
+                scatter_label = True
+            if my_args.color:
+                palette = my_args.color
+
+            func.cluster_figure(iso_result,
+                                point_label=scatter_label,
+                                fig_name=figure_name,
+                                fig_dpi=dpi,
+                                tp_tag=transparent,
+                                fig_width=figure_width,
+                                fig_height=figure_height,
+                                color_tag=palette)
+
+            print("\n" + "NOTE: Plotting Completed!")
+
+        if my_args.pc2:
+            print(f"{Fore.LIGHTYELLOW_EX}NOTE: Testing Part Start{Fore.RESET}")
+            figure_name = result_path + os.sep + output_prefix + "Isomap-Plot" + ".pdf"
+            func.clustering_plot2(iso_result, fig_name=figure_name)
+
+            print(f"{Fore.LIGHTYELLOW_EX}NOTE: Testing Part Ends{Fore.RESET}")
+
+    if my_args.spectremb:
+        print("NOTE: Activating Spectremb function!")
+        # spectremb default parameters
+        dimension = 2
+
+        # spectremb parameters
+        if my_args.td:
+            dimension = my_args.td
+
+        print("\n" + "Spectremb Parameters:")
+        print(f"Dimension:{dimension}")
+
+        spectremb_result = func.spectremb(my_args.input, n_dimension=dimension)
+
+        spectremb_result_path = result_path + os.sep + output_prefix + "spectremb.csv"
+        spectremb_result.to_csv(spectremb_result_path)
+        print("NOTE: Spectremb Completed!")
+
+        # PLOTTING
+        if my_args.pc:
+            # Plot Scatter
+            print(f"NOTE: Activating Spectremb Plotting function!")
+            spectremb_result["Virus"] = spectremb_result.index
+            scatter_label = False
+            figure_format = "pdf"
+            if my_args.format:
+                figure_format = my_args.format
+
+            figure_name = result_path + os.sep + output_prefix + "Spectremb-Plot" + "." + figure_format
+            dpi = 300
+            transparent = False
+            figure_width = 8
+            figure_height = 6
+            palette = "RdYlBu"
+
+            if my_args.fname:
+                figure_name = result_path + os.sep + output_prefix + my_args.fname + "." + figure_format
+            if my_args.dpi:
+                dpi = my_args.dpi
+            if my_args.tp:
+                transparent = True
+            if my_args.fw:
+                figure_width = my_args.fw
+            if my_args.fh:
+                figure_height = my_args.fh
+            if my_args.sl:
+                scatter_label = True
+            if my_args.color:
+                palette = my_args.color
+
+            func.cluster_figure(spectremb_result,
+                                point_label=scatter_label,
+                                fig_name=figure_name,
+                                fig_dpi=dpi,
+                                tp_tag=transparent,
+                                fig_width=figure_width,
+                                fig_height=figure_height,
+                                color_tag=palette)
+
+            print("\n" + "NOTE: Plotting Completed!")
+
+        if my_args.pc2:
+            print(f"{Fore.LIGHTYELLOW_EX}NOTE: Testing Part Start{Fore.RESET}")
+            figure_name = result_path + os.sep + output_prefix + "Spectremb-Plot" + ".pdf"
+            func.clustering_plot2(spectremb_result, fig_name=figure_name)
+
+            print(f"{Fore.LIGHTYELLOW_EX}NOTE: Testing Part Ends{Fore.RESET}")
+
+    if my_args.lle:
+        print("NOTE: Activating LLE function!")
+        # LLE default parameters
+        dimension = 2
+
+        # LLE parameters
+        if my_args.td:
+            dimension = my_args.td
+
+        print("\n" + "LLE Parameters:")
+        print(f"Dimension:{dimension}")
+
+        LLE_result = func.my_lle(my_args.input, n_dimension=dimension)
+
+        LLE_result_path = result_path + os.sep + output_prefix + "LLE.csv"
+        LLE_result.to_csv(LLE_result_path)
+        print("NOTE: LLE Completed!")
+
+        # PLOTTING
+        if my_args.pc:
+            # Plot Scatter
+            print(f"NOTE: Activating LLE Plotting function!")
+            LLE_result["Virus"] = LLE_result.index
+            scatter_label = False
+            figure_format = "pdf"
+            if my_args.format:
+                figure_format = my_args.format
+
+            figure_name = result_path + os.sep + output_prefix + "LLE-Plot" + "." + figure_format
+            dpi = 300
+            transparent = False
+            figure_width = 8
+            figure_height = 6
+            palette = "RdYlBu"
+
+            if my_args.fname:
+                figure_name = result_path + os.sep + output_prefix + my_args.fname + "." + figure_format
+            if my_args.dpi:
+                dpi = my_args.dpi
+            if my_args.tp:
+                transparent = True
+            if my_args.fw:
+                figure_width = my_args.fw
+            if my_args.fh:
+                figure_height = my_args.fh
+            if my_args.sl:
+                scatter_label = True
+            if my_args.color:
+                palette = my_args.color
+
+            func.cluster_figure(LLE_result,
+                                point_label=scatter_label,
+                                fig_name=figure_name,
+                                fig_dpi=dpi,
+                                tp_tag=transparent,
+                                fig_width=figure_width,
+                                fig_height=figure_height,
+                                color_tag=palette)
+
+            print("\n" + "NOTE: Plotting Completed!")
+
+        if my_args.pc2:
+            print(f"{Fore.LIGHTYELLOW_EX}NOTE: Testing Part Start{Fore.RESET}")
+            figure_name = result_path + os.sep + output_prefix + "LLE-Plot" + ".pdf"
+            func.clustering_plot2(LLE_result, fig_name=figure_name)
+
+            print(f"{Fore.LIGHTYELLOW_EX}NOTE: Testing Part Ends{Fore.RESET}")
+
+    if my_args.kpca:
+        print("NOTE: Activating Kernel PCA function!")
+        # kPCA default parameters
+        dimension = 2
+
+        # kPCA parameters
+        if my_args.td:
+            dimension = my_args.td
+
+        print("\n" + "kPCA Parameters:")
+        print(f"Dimension:{dimension}")
+
+        kPCA_result = func.kernelPCA(my_args.input, n_dimension=dimension)
+
+        kPCA_result_path = result_path + os.sep + output_prefix + "kPCA.csv"
+        kPCA_result.to_csv(kPCA_result_path)
+        print("NOTE: kPCA Completed!")
+
+        # PLOTTING
+        if my_args.pc:
+            # Plot Scatter
+            print(f"NOTE: Activating kPCA Plotting function!")
+            kPCA_result["Virus"] = kPCA_result.index
+            scatter_label = False
+            figure_format = "pdf"
+            if my_args.format:
+                figure_format = my_args.format
+
+            figure_name = result_path + os.sep + output_prefix + "kPCA-Plot" + "." + figure_format
+            dpi = 300
+            transparent = False
+            figure_width = 8
+            figure_height = 6
+            palette = "RdYlBu"
+
+            if my_args.fname:
+                figure_name = result_path + os.sep + output_prefix + my_args.fname + "." + figure_format
+            if my_args.dpi:
+                dpi = my_args.dpi
+            if my_args.tp:
+                transparent = True
+            if my_args.fw:
+                figure_width = my_args.fw
+            if my_args.fh:
+                figure_height = my_args.fh
+            if my_args.sl:
+                scatter_label = True
+            if my_args.color:
+                palette = my_args.color
+
+            func.cluster_figure(kPCA_result,
+                                point_label=scatter_label,
+                                fig_name=figure_name,
+                                fig_dpi=dpi,
+                                tp_tag=transparent,
+                                fig_width=figure_width,
+                                fig_height=figure_height,
+                                color_tag=palette)
+
+            print("\n" + "NOTE: Plotting Completed!")
+
+        if my_args.pc2:
+            print(f"{Fore.LIGHTYELLOW_EX}NOTE: Testing Part Start{Fore.RESET}")
+            figure_name = result_path + os.sep + output_prefix + "kPCA-Plot" + ".pdf"
+            func.clustering_plot2(kPCA_result, fig_name=figure_name)
+
+            print(f"{Fore.LIGHTYELLOW_EX}NOTE: Testing Part Ends{Fore.RESET}")
+
+    if my_args.rfp:
+        print("NOTE: Activating Random Forest + PCA function!")
+        # rfp default parameters
+        dimension = 2
+
+        # rfp parameters
+        if my_args.td:
+            dimension = my_args.td
+
+        print("\n" + "rfp Parameters:")
+        print(f"Dimension:{dimension}")
+
+        rfp_result = func.randomForest_PCA(my_args.input, n_dimension=dimension)
+
+        rfp_result_path = result_path + os.sep + output_prefix + "rfp.csv"
+        rfp_result.to_csv(rfp_result_path)
+        print("NOTE: rfp Completed!")
+
+        # PLOTTING
+        if my_args.pc:
+            # Plot Scatter
+            print(f"NOTE: Activating rfp Plotting function!")
+            rfp_result["Virus"] = rfp_result.index
+            scatter_label = False
+            figure_format = "pdf"
+            if my_args.format:
+                figure_format = my_args.format
+
+            figure_name = result_path + os.sep + output_prefix + "rfp-Plot" + "." + figure_format
+            dpi = 300
+            transparent = False
+            figure_width = 8
+            figure_height = 6
+            palette = "RdYlBu"
+
+            if my_args.fname:
+                figure_name = result_path + os.sep + output_prefix + my_args.fname + "." + figure_format
+            if my_args.dpi:
+                dpi = my_args.dpi
+            if my_args.tp:
+                transparent = True
+            if my_args.fw:
+                figure_width = my_args.fw
+            if my_args.fh:
+                figure_height = my_args.fh
+            if my_args.sl:
+                scatter_label = True
+            if my_args.color:
+                palette = my_args.color
+
+            func.cluster_figure(rfp_result,
+                                point_label=scatter_label,
+                                fig_name=figure_name,
+                                fig_dpi=dpi,
+                                tp_tag=transparent,
+                                fig_width=figure_width,
+                                fig_height=figure_height,
+                                color_tag=palette)
+
+            print("\n" + "NOTE: Plotting Completed!")
+
+        if my_args.pc2:
+            print(f"{Fore.LIGHTYELLOW_EX}NOTE: Testing Part Start{Fore.RESET}")
+            figure_name = result_path + os.sep + output_prefix + "rfp-Plot" + ".pdf"
+            func.clustering_plot2(rfp_result, fig_name=figure_name)
+
+            print(f"{Fore.LIGHTYELLOW_EX}NOTE: Testing Part Ends{Fore.RESET}")
 
     if my_args.pts:
         result_dir = os.path.dirname(my_args.input)
