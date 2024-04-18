@@ -9,7 +9,7 @@ import re
 import sys
 from functools import reduce
 from itertools import cycle
-from typing import Any
+from typing import Any, List
 
 from sklearn import metrics
 from sklearn.cluster import DBSCAN, OPTICS, KMeans, AgglomerativeClustering
@@ -28,7 +28,7 @@ import pandas as pd
 from colorama import Fore
 
 
-def files_path(dirname, sys_os):
+def files_path(dirname: str, sys_os: str) -> list:
     """
     Gets all file paths of the folder
     :param sys_os: system operation type
@@ -71,7 +71,7 @@ def files_path(dirname, sys_os):
     return file_path_list
 
 
-def file_type_judge(file_path):
+def file_type_judge(file_path: str) -> str:
     file_extension = file_path.split('.')[-1].lower()
     # determine file type
     if file_extension == 'csv':
@@ -84,7 +84,7 @@ def file_type_judge(file_path):
         return 'Unknown'
 
 
-def files_combine(file_path_list):
+def files_combine(file_path_list: List[str]) -> list:
     content = []
 
     for item in file_path_list:
@@ -94,14 +94,14 @@ def files_combine(file_path_list):
     return content
 
 
-def read_file(file_path):
+def read_file(file_path: str) -> list:
     content = []
     for line in linecache.getlines(file_path):
         content.append(line)
     return content
 
 
-def fasta_doc_std(file_list):
+def fasta_doc_std(file_list: List[str]):
     """
     Standardization of fasta documents
     NOTE: the result (list) format is that seq name and seq locate in same line!!!
@@ -128,7 +128,7 @@ def fasta_doc_std(file_list):
     return seq_list  # return list
 
 
-def seq_cut(start_info, end_info, seq_file_list, cut_tag):
+def seq_cut(start_info: str or int, end_info: str or int, seq_file_list: List[str], cut_tag: str) -> List[str]:
     """
     according to the input seq, including start seq and end seq, this is function will locate them in the reference seq,
     and obtain the index (location), then cut the sequences to target fragment.
@@ -160,13 +160,13 @@ def seq_cut(start_info, end_info, seq_file_list, cut_tag):
     return result_list  # return a list
 
 
-def list_to_save(file_in_list, file_path):
+def list_to_save(file_in_list: List[str], file_path: str):
     with open(file_path, "w") as F:
         for item in file_in_list:
             F.write(item + "\n")
 
 
-def nucleotide_judge(seq):
+def nucleotide_judge(seq: str) -> str:
     """
     judge the nucleotide type (DNA or RNA)
     :param seq: the seq format is 'string'
@@ -181,19 +181,19 @@ def nucleotide_judge(seq):
         return "error"
 
 
-def dna_to_rna(seq):
+def dna_to_rna(seq: str) -> str:
     seq = seq.upper()
     seq = re.sub("T", "U", seq)
     return seq
 
 
-def rna_to_dna(seq):
+def rna_to_dna(seq: str) -> str:
     seq = seq.upper()
     seq = re.sub("U", "T", seq)
     return seq.upper()
 
 
-def codon_check(seq_list):
+def codon_check(seq_list: List[str]) -> str:
     seq_len_list = []
     # judge the type of nucleic acid
     ref_seq = seq_list[0].split("\n")[1]  # the first seq
@@ -217,7 +217,7 @@ def codon_check(seq_list):
     return nt_tag
 
 
-def translate_to_protein(seq_list, nt_tag):  # DNA in default
+def translate_to_protein(seq_list: List[str], nt_tag: str) -> List[str]:  # DNA in default
     result_list = []
     if nt_tag == "error":
         print(Fore.RED + "ERROR: Sequence information not recognized, please check sequence!")
@@ -245,7 +245,7 @@ def translate_to_protein(seq_list, nt_tag):  # DNA in default
     return result_list
 
 
-def delete_gap(file_list):
+def delete_gap(file_list: List[str]) -> List[str]:
     seq_len_list = []
     seq_dict = {}
 
@@ -283,7 +283,7 @@ def delete_gap(file_list):
     return result_list
 
 
-def compute_polymorphism(seq_list):
+def compute_polymorphism(seq_list: List[str]) -> tuple[pd.DataFrame, List[str], List[str]]:
     """
     this function will compute the polymorphism of the amino acids, and generate a table on each polymorphism site.
     It contains several steps as following.
@@ -399,7 +399,7 @@ def compute_polymorphism(seq_list):
     return seq_df, concise_result, detailed_result
 
 
-def change_name(seq_list, name_file_path):
+def change_name(seq_list: List[str], name_file_path: str) -> List[str]:
     """
     change the name in sequence files
     :param seq_list: sequence file
@@ -448,7 +448,7 @@ def change_name(seq_list, name_file_path):
     return result_list
 
 
-def output_name(seq_list):
+def output_name(seq_list: List[str]):
     result_list = []
     for line in seq_list:
         seq_name = line.split("\n")[0]
@@ -460,7 +460,7 @@ def output_name(seq_list):
     return result_df
 
 
-def shannon_h_value(list_tuple, tag=20):
+def shannon_h_value(list_tuple: List[tuple], tag=20) -> List[float]:
     """
     calculate shannon IC value
     :param list_tuple: format like this: [(A,80),(B,90)...]
@@ -479,7 +479,7 @@ def shannon_h_value(list_tuple, tag=20):
     return [IC]
 
 
-def shannon_entropy(file_path, maximum=0, minimum=0):
+def shannon_entropy(file_path: str, maximum=0, minimum=0) -> pd.DataFrame:
     """
     compute the shannon entropy and filter the result according to the threshold
     :param minimum: the minimum of the threshold
@@ -565,7 +565,7 @@ def shannon_entropy(file_path, maximum=0, minimum=0):
     return peptide_df
 
 
-def shannon_filter(file_df, maximum=99999, minimum=-99999):
+def shannon_filter(file_df: pd.DataFrame, maximum=99999, minimum=-99999) -> List[int]:
     filtered_df = file_df[(file_df["IC"] >= minimum) & (file_df["IC"] <= maximum)]
     filtered_df["Pure_Site"] = filtered_df["SITE"].str.extract(r'(\d+)')
     pure_site = filtered_df["Pure_Site"].tolist()
@@ -573,7 +573,8 @@ def shannon_filter(file_df, maximum=99999, minimum=-99999):
     return pure_site  # This is a list containing key sites
 
 
-def one_hot_encoding(seq_matrix, site_list):
+def one_hot_encoding(seq_matrix: pd.DataFrame, site_list: List[int]) -> \
+        tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
     extract key sites of the sequence matrix
     :param seq_matrix: the sequence matrix which row and column stand for sequence and residue site, respectively
@@ -639,7 +640,7 @@ def one_hot_encoding(seq_matrix, site_list):
     return raw_aa_mat, filtered_matrix, expand_matrix, site_matrix
 
 
-def obtain_aaindex():
+def obtain_aaindex() -> tuple[dict, pd.DataFrame]:
     print("NOTE: Reading AAindex File!")
     aaindex_path = os.path.dirname(__file__) + os.sep + "aaindex1_20170213"
     raw_data = read_file(aaindex_path)
@@ -697,7 +698,8 @@ def obtain_aaindex():
     return aaindex_dict, aaindex_df_T
 
 
-def aaindex_encoding(seq_matrix, site_list):
+def aaindex_encoding(seq_matrix: pd.DataFrame, site_list: List[int]) -> \
+        tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     filtered_matrix = seq_matrix.iloc[site_list]
 
     # judge sequence quality
@@ -747,7 +749,7 @@ def aaindex_encoding(seq_matrix, site_list):
     return raw_aa_mat, filtered_matrix, expand_matrix, site_matrix
 
 
-def pca(onehot_file_path):
+def pca(onehot_file_path: str) -> pd.DataFrame:
     """
     Dimension reduction by principal component analysis
     :param onehot_file_path: the 'OneHot-Transform.csv'
@@ -791,7 +793,7 @@ def pca(onehot_file_path):
     return new_data
 
 
-def tsne(onehot_file_path, n_dimension, perp, learn_rate, niter):
+def tsne(onehot_file_path: str, n_dimension: int, perp: int, learn_rate: int, niter: int) -> pd.DataFrame:
     filetype = file_type_judge(onehot_file_path)
     if filetype == "CSV":
         onehot_mat = pd.read_csv(onehot_file_path, header=0, index_col=0)
@@ -814,7 +816,7 @@ def tsne(onehot_file_path, n_dimension, perp, learn_rate, niter):
     return tsne_data
 
 
-def isomapping(onehot_file_path, n_dimension):
+def isomapping(onehot_file_path: str, n_dimension: int) -> pd.DataFrame:
     filetype = file_type_judge(onehot_file_path)
     if filetype == "CSV":
         onehot_mat = pd.read_csv(onehot_file_path, header=0, index_col=0)
@@ -832,7 +834,7 @@ def isomapping(onehot_file_path, n_dimension):
     return isomap_data
 
 
-def spectremb(onehot_file_path, n_dimension):
+def spectremb(onehot_file_path: str, n_dimension: int) -> pd.DataFrame:
     filetype = file_type_judge(onehot_file_path)
     if filetype == "CSV":
         onehot_mat = pd.read_csv(onehot_file_path, header=0, index_col=0)
@@ -850,7 +852,7 @@ def spectremb(onehot_file_path, n_dimension):
     return spectremb_data
 
 
-def my_lle(onehot_file_path, n_dimension):
+def my_lle(onehot_file_path: str, n_dimension: int) -> pd.DataFrame:
     filetype = file_type_judge(onehot_file_path)
     if filetype == "CSV":
         onehot_mat = pd.read_csv(onehot_file_path, header=0, index_col=0)
@@ -868,7 +870,7 @@ def my_lle(onehot_file_path, n_dimension):
     return lle_data
 
 
-def kernelPCA(onehot_file_path, n_dimension):
+def kernelPCA(onehot_file_path: str, n_dimension: int) -> pd.DataFrame:
     filetype = file_type_judge(onehot_file_path)
     if filetype == "CSV":
         onehot_mat = pd.read_csv(onehot_file_path, header=0, index_col=0)
@@ -886,7 +888,7 @@ def kernelPCA(onehot_file_path, n_dimension):
     return kPCA_data
 
 
-def randomForest_PCA(onehot_file_path, n_dimension):
+def randomForest_PCA(onehot_file_path: str, n_dimension: int) -> pd.DataFrame:
     filetype = file_type_judge(onehot_file_path)
     if filetype == "CSV":
         onehot_mat = pd.read_csv(onehot_file_path, header=0, index_col=0)
@@ -912,7 +914,7 @@ def randomForest_PCA(onehot_file_path, n_dimension):
     return rfp_data
 
 
-def set_differences(exp_mat, set_info):
+def set_differences(exp_mat: pd.DataFrame, set_info: pd.DataFrame) -> List[str]:
     # remove all the chars started with '>' in the index column
     exp_mat.index = exp_mat.index.str.lstrip('>')
 
@@ -979,7 +981,7 @@ def set_differences(exp_mat, set_info):
     return differ_df
 
 
-def clustering_plot(cluster_res, dataframe, fig_name):
+def clustering_plot(cluster_res, dataframe: pd.DataFrame, fig_name: str) -> None:
     fig = plt.figure()
     ax = fig.add_subplot(111, projection="3d")
 
@@ -1004,7 +1006,7 @@ def clustering_plot(cluster_res, dataframe, fig_name):
     plt.savefig(fig_name, dpi=600)
 
 
-def clustering_plot2(dataframe, fig_name):
+def clustering_plot2(dataframe: pd.DataFrame, fig_name: str) -> None:
     fig = plt.figure()
     ax = fig.add_subplot(111, projection="3d")
 
@@ -1027,7 +1029,7 @@ def clustering_plot2(dataframe, fig_name):
     plt.savefig(fig_name, dpi=600)
 
 
-def plot_3d_scatter(dataframe, fig_name):
+def plot_3d_scatter(dataframe: pd.DataFrame, fig_name: str) -> None:
     fig = plt.figure()
     ax = fig.add_subplot(111, projection="3d")
 
@@ -1048,7 +1050,7 @@ def plot_3d_scatter(dataframe, fig_name):
     plt.savefig(fig_name, dpi=600)
 
 
-def dbscan(dimension_mat, result_path, epsilon, minPts):
+def dbscan(dimension_mat: pd.DataFrame, result_path: str, epsilon: float, minPts: float) -> pd.DataFrame:
     result_path = os.path.dirname(result_path)
     three_dimension_mat = dimension_mat.iloc[:, 0:3]
 
@@ -1084,7 +1086,7 @@ def dbscan(dimension_mat, result_path, epsilon, minPts):
     return three_dimension_mat
 
 
-def optics(dimension_mat, result_path):
+def optics(dimension_mat: pd.DataFrame, result_path: str) -> None:
     result_path = os.path.dirname(result_path)
     figure_name = os.path.join(result_path, "OPTICS.pdf")
 
@@ -1101,7 +1103,7 @@ def optics(dimension_mat, result_path):
     print(f"Silhouette Coefficient:{score}")
 
 
-def kmean(dimension_mat, result_path, cluster):
+def kmean(dimension_mat: pd.DataFrame, result_path: str, cluster: int) -> None:
     result_path = os.path.dirname(result_path)
     figure_name = os.path.join(result_path, "K-Mean.pdf")
 
@@ -1118,7 +1120,7 @@ def kmean(dimension_mat, result_path, cluster):
     print(f"Silhouette Coefficient:{score}")
 
 
-def agglomerative(dimension_mat, result_path, cluster):
+def agglomerative(dimension_mat: pd.DataFrame, result_path: str, cluster: int) -> None:
     result_path = os.path.dirname(result_path)
     figure_name = os.path.join(result_path, "Agglomerative.pdf")
 
@@ -1135,7 +1137,7 @@ def agglomerative(dimension_mat, result_path, cluster):
     print(f"Silhouette Coefficient:{score}")
 
 
-def generate_random_colors(num_colors):
+def generate_random_colors(num_colors: int) -> List[str]:
     colors = []
 
     for i in range(num_colors * 2):
@@ -1151,13 +1153,13 @@ def generate_random_colors(num_colors):
     return random_colors
 
 
-def polymorphism_figure(compute_polymorphism_df,
-                        compute_polymorphism_concise_list,
-                        figure_name,
-                        figure_dpi,
-                        transparent_tag,
+def polymorphism_figure(compute_polymorphism_df: pd.DataFrame,
+                        compute_polymorphism_concise_list: List[str],
+                        figure_name: str,
+                        figure_dpi: int,
+                        transparent_tag: str or bool,
                         fig_width=14,
-                        fig_height=9):
+                        fig_height=9) -> None:
     original_df = compute_polymorphism_df
     original_list = compute_polymorphism_concise_list
 
@@ -1268,14 +1270,14 @@ def polymorphism_figure(compute_polymorphism_df,
     plt.savefig(fname=figure_name, dpi=figure_dpi, transparent=transparent_tag)
 
 
-def ic_scatter_figure(shannon_ic_df,
-                      fig_name,
-                      fig_dpi,
-                      tp_tag,
-                      color_tag,
+def ic_scatter_figure(shannon_ic_df: pd.DataFrame,
+                      fig_name: str,
+                      fig_dpi: int,
+                      tp_tag: str or bool,
+                      color_tag: str,
                       fig_width=10,
                       fig_height=8,
-                      ):
+                      ) -> None:
     # x-axis & y-axis information
     x_info = shannon_ic_df.iloc[:, 0]
     y_info = shannon_ic_df.iloc[:, 1]
@@ -1329,12 +1331,12 @@ def ic_scatter_figure(shannon_ic_df,
 
 def cluster_figure(dr_result,
                    point_label,
-                   color_tag,
-                   fig_name,
-                   fig_dpi,
-                   tp_tag,
-                   fig_width,
-                   fig_height):
+                   color_tag: str,
+                   fig_name: str,
+                   fig_dpi: int,
+                   tp_tag: str or bool,
+                   fig_width: int,
+                   fig_height: int) -> None:
     pc_1 = dr_result.iloc[:, 0]
     pc_2 = dr_result.iloc[:, 1]
     virus_info = dr_result.iloc[:, -1]
@@ -1390,7 +1392,7 @@ def cluster_figure(dr_result,
     # plt.show()
 
 
-def output_palettes():
+def output_palettes() -> None:
     print("\n" + "NOTE: All supported palettes in the pipeline:")
     print("Below is a complete list of all palette options. "
           "Most palettes can have the suffix '_r' to indicate the same "
