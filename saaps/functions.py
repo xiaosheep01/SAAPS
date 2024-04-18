@@ -283,7 +283,7 @@ def delete_gap(file_list: List[str]) -> List[str]:
     return result_list
 
 
-def compute_polymorphism(seq_list: List[str]) -> tuple[pd.DataFrame, List[str], List[str]]:
+def compute_polymorphism(seq_list: List[str]) -> tuple:
     """
     this function will compute the polymorphism of the amino acids, and generate a table on each polymorphism site.
     It contains several steps as following.
@@ -573,8 +573,7 @@ def shannon_filter(file_df: pd.DataFrame, maximum=99999, minimum=-99999) -> List
     return pure_site  # This is a list containing key sites
 
 
-def one_hot_encoding(seq_matrix: pd.DataFrame, site_list: List[int]) -> \
-        tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def one_hot_encoding(seq_matrix: pd.DataFrame, site_list: List[int]) -> tuple:
     """
     extract key sites of the sequence matrix
     :param seq_matrix: the sequence matrix which row and column stand for sequence and residue site, respectively
@@ -640,7 +639,7 @@ def one_hot_encoding(seq_matrix: pd.DataFrame, site_list: List[int]) -> \
     return raw_aa_mat, filtered_matrix, expand_matrix, site_matrix
 
 
-def obtain_aaindex() -> tuple[dict, pd.DataFrame]:
+def obtain_aaindex() -> tuple:
     print("NOTE: Reading AAindex File!")
     aaindex_path = os.path.dirname(__file__) + os.sep + "aaindex1_20170213"
     raw_data = read_file(aaindex_path)
@@ -698,8 +697,7 @@ def obtain_aaindex() -> tuple[dict, pd.DataFrame]:
     return aaindex_dict, aaindex_df_T
 
 
-def aaindex_encoding(seq_matrix: pd.DataFrame, site_list: List[int]) -> \
-        tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def aaindex_encoding(seq_matrix: pd.DataFrame, site_list: List[int]) -> tuple:
     filtered_matrix = seq_matrix.iloc[site_list]
 
     # judge sequence quality
