@@ -9,7 +9,7 @@ import re
 import sys
 from functools import reduce
 from itertools import cycle
-from typing import Any, List
+from typing import Any, List, Tuple
 
 from sklearn import metrics
 from sklearn.cluster import DBSCAN, OPTICS, KMeans, AgglomerativeClustering
@@ -28,7 +28,7 @@ import pandas as pd
 from colorama import Fore
 
 
-def files_path(dirname: str, sys_os: str) -> list:
+def files_path(dirname: str, sys_os: str) -> List[str]:
     """
     Gets all file paths of the folder
     :param sys_os: system operation type
@@ -283,7 +283,7 @@ def delete_gap(file_list: List[str]) -> List[str]:
     return result_list
 
 
-def compute_polymorphism(seq_list: List[str]) -> tuple:
+def compute_polymorphism(seq_list: List[str]) -> Tuple[pd.DataFrame, List[str], List[str]]:
     """
     this function will compute the polymorphism of the amino acids, and generate a table on each polymorphism site.
     It contains several steps as following.
@@ -448,7 +448,7 @@ def change_name(seq_list: List[str], name_file_path: str) -> List[str]:
     return result_list
 
 
-def output_name(seq_list: List[str]):
+def output_name(seq_list: List[str]) -> pd.DataFrame:
     result_list = []
     for line in seq_list:
         seq_name = line.split("\n")[0]
@@ -573,7 +573,8 @@ def shannon_filter(file_df: pd.DataFrame, maximum=99999, minimum=-99999) -> List
     return pure_site  # This is a list containing key sites
 
 
-def one_hot_encoding(seq_matrix: pd.DataFrame, site_list: List[int]) -> tuple:
+def one_hot_encoding(seq_matrix: pd.DataFrame, site_list: List[int]) -> \
+        Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
     extract key sites of the sequence matrix
     :param seq_matrix: the sequence matrix which row and column stand for sequence and residue site, respectively
@@ -639,7 +640,7 @@ def one_hot_encoding(seq_matrix: pd.DataFrame, site_list: List[int]) -> tuple:
     return raw_aa_mat, filtered_matrix, expand_matrix, site_matrix
 
 
-def obtain_aaindex() -> tuple:
+def obtain_aaindex() -> Tuple[dict, pd.DataFrame]:
     print("NOTE: Reading AAindex File!")
     aaindex_path = os.path.dirname(__file__) + os.sep + "aaindex1_20170213"
     raw_data = read_file(aaindex_path)
@@ -697,7 +698,8 @@ def obtain_aaindex() -> tuple:
     return aaindex_dict, aaindex_df_T
 
 
-def aaindex_encoding(seq_matrix: pd.DataFrame, site_list: List[int]) -> tuple:
+def aaindex_encoding(seq_matrix: pd.DataFrame, site_list: List[int]) -> \
+        Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     filtered_matrix = seq_matrix.iloc[site_list]
 
     # judge sequence quality
@@ -912,7 +914,7 @@ def randomForest_PCA(onehot_file_path: str, n_dimension: int) -> pd.DataFrame:
     return rfp_data
 
 
-def set_differences(exp_mat: pd.DataFrame, set_info: pd.DataFrame) -> List[str]:
+def set_differences(exp_mat: pd.DataFrame, set_info: pd.DataFrame) -> pd.DataFrame:
     # remove all the chars started with '>' in the index column
     exp_mat.index = exp_mat.index.str.lstrip('>')
 
