@@ -125,6 +125,15 @@ def starts():
         dr_group.add_argument("-tsne", "--TSNE", action="store_true", dest="tsne",
                               help="Dimensionality reduction by t-SNE, "
                                    "please input the OneHot matrix from the '-oh' parameter")
+        dr_group.add_argument("-ica", "--ICA", action="store_true", dest="ica",
+                              help="Dimensionality reduction by ICA, "
+                                   "please input the OneHot matrix from the '-oh' parameter")
+        dr_group.add_argument("-fa", "--FactorAnalysis", action="store_true", dest="fa",
+                              help="Dimensionality reduction by FactorAnalysis, "
+                                   "please input the OneHot matrix from the '-oh' parameter")
+        dr_group.add_argument("-mds", "--MDS", action="store_true", dest="mds",
+                              help="Dimensionality reduction by MDS, "
+                                   "please input the OneHot matrix from the '-oh' parameter")
         dr_group.add_argument("-isomap", "--ISOMAP", action="store_true", dest="isomap",
                               help="Dimensionality reduction by Isomap, "
                                    "please input the OneHot matrix from the '-oh' parameter")
@@ -234,7 +243,7 @@ def starts():
     if my_args.input:
         if any([my_args.shannon, my_args.one_hot, my_args.pca, my_args.tsne, my_args.dbscan, my_args.optics,
                 my_args.kmean, my_args.agglo, my_args.pts, my_args.aaindex, my_args.isomap, my_args.spectremb,
-                my_args.lle, my_args.kpca, my_args.rfp]):
+                my_args.lle, my_args.kpca, my_args.rfp, my_args.ica, my_args.fa, my_args.mds]):
             pass
 
         else:
@@ -542,6 +551,13 @@ def starts():
 
             print("\n" + "NOTE: Plotting Completed!")
 
+        if my_args.pc2:
+            print(f"{Fore.LIGHTYELLOW_EX}NOTE: Testing Part Start{Fore.RESET}")
+            figure_name = result_path + os.sep + output_prefix + "PCA-Plot" + ".pdf"
+            func.clustering_plot2(pca_result, fig_name=figure_name)
+
+            print(f"{Fore.LIGHTYELLOW_EX}NOTE: Testing Part Ends{Fore.RESET}")
+
     # '-tsne' parameter
     # dimension reduction
     if my_args.tsne:
@@ -701,6 +717,7 @@ def starts():
 
             print(f"{Fore.LIGHTYELLOW_EX}NOTE: Testing Part Ends{Fore.RESET}")
 
+    # '-spectremb'
     if my_args.spectremb:
         print("NOTE: Activating Spectremb function!")
         # spectremb default parameters
@@ -970,6 +987,211 @@ def starts():
             print(f"{Fore.LIGHTYELLOW_EX}NOTE: Testing Part Start{Fore.RESET}")
             figure_name = result_path + os.sep + output_prefix + "rfp-Plot" + ".pdf"
             func.clustering_plot2(rfp_result, fig_name=figure_name)
+
+            print(f"{Fore.LIGHTYELLOW_EX}NOTE: Testing Part Ends{Fore.RESET}")
+
+    # ICA
+    if my_args.ica:
+        print("NOTE: Activating ICA function!")
+        # ica default parameters
+        dimension = 2
+
+        # ica parameters
+        if my_args.td:
+            dimension = my_args.td
+
+        print("\n" + "ICA Parameters:")
+        print(f"Dimension:{dimension}")
+
+        ica_result = func.ica(my_args.input, n_dimension=dimension)
+
+        ica_result_path = result_path + os.sep + output_prefix + "ica.csv"
+        ica_result.to_csv(ica_result_path)
+        print("NOTE: ICA Completed!")
+
+        # PLOTTING
+        if my_args.pc:
+            # Plot Scatter
+            print(f"NOTE: Activating PCA Plotting function!")
+            ica_result["Virus"] = ica_result.index
+            scatter_label = False
+            figure_format = "pdf"
+            if my_args.format:
+                figure_format = my_args.format
+
+            figure_name = result_path + os.sep + output_prefix + "ICA-Plot" + "." + figure_format
+            dpi = 300
+            transparent = False
+            figure_width = 8
+            figure_height = 6
+            palette = "RdYlBu"
+
+            if my_args.fname:
+                figure_name = result_path + os.sep + output_prefix + my_args.fname + "." + figure_format
+            if my_args.dpi:
+                dpi = my_args.dpi
+            if my_args.tp:
+                transparent = True
+            if my_args.fw:
+                figure_width = my_args.fw
+            if my_args.fh:
+                figure_height = my_args.fh
+            if my_args.sl:
+                scatter_label = True
+            if my_args.color:
+                palette = my_args.color
+
+            func.cluster_figure(ica_result,
+                                point_label=scatter_label,
+                                fig_name=figure_name,
+                                fig_dpi=dpi,
+                                tp_tag=transparent,
+                                fig_width=figure_width,
+                                fig_height=figure_height,
+                                color_tag=palette)
+
+            print("\n" + "NOTE: Plotting Completed!")
+
+        if my_args.pc2:
+            print(f"{Fore.LIGHTYELLOW_EX}NOTE: Testing Part Start{Fore.RESET}")
+            figure_name = result_path + os.sep + output_prefix + "ICA-Plot" + ".pdf"
+            func.clustering_plot2(ica_result, fig_name=figure_name)
+
+            print(f"{Fore.LIGHTYELLOW_EX}NOTE: Testing Part Ends{Fore.RESET}")
+
+    if my_args.fa:
+        print("NOTE: Activating Factor Analysis function!")
+        # Factor Analysis default parameters
+        dimension = 2
+
+        # Factor Analysis parameters
+        if my_args.td:
+            dimension = my_args.td
+
+        print("\n" + "Factor Analysis Parameters:")
+        print(f"Dimension:{dimension}")
+
+        fa_result = func.factor_analysis(my_args.input, n_dimension=dimension)
+
+        fa_result_path = result_path + os.sep + output_prefix + "fa.csv"
+        fa_result.to_csv(fa_result_path)
+        print("NOTE: Factor Analysis Completed!")
+
+        # PLOTTING
+        if my_args.pc:
+            # Plot Scatter
+            print(f"NOTE: Activating PCA Plotting function!")
+            fa_result["Virus"] = fa_result.index
+            scatter_label = False
+            figure_format = "pdf"
+            if my_args.format:
+                figure_format = my_args.format
+
+            figure_name = result_path + os.sep + output_prefix + "FA-Plot" + "." + figure_format
+            dpi = 300
+            transparent = False
+            figure_width = 8
+            figure_height = 6
+            palette = "RdYlBu"
+
+            if my_args.fname:
+                figure_name = result_path + os.sep + output_prefix + my_args.fname + "." + figure_format
+            if my_args.dpi:
+                dpi = my_args.dpi
+            if my_args.tp:
+                transparent = True
+            if my_args.fw:
+                figure_width = my_args.fw
+            if my_args.fh:
+                figure_height = my_args.fh
+            if my_args.sl:
+                scatter_label = True
+            if my_args.color:
+                palette = my_args.color
+
+            func.cluster_figure(fa_result,
+                                point_label=scatter_label,
+                                fig_name=figure_name,
+                                fig_dpi=dpi,
+                                tp_tag=transparent,
+                                fig_width=figure_width,
+                                fig_height=figure_height,
+                                color_tag=palette)
+
+            print("\n" + "NOTE: Plotting Completed!")
+
+        if my_args.pc2:
+            print(f"{Fore.LIGHTYELLOW_EX}NOTE: Testing Part Start{Fore.RESET}")
+            figure_name = result_path + os.sep + output_prefix + "FA-Plot" + ".pdf"
+            func.clustering_plot2(fa_result, fig_name=figure_name)
+
+            print(f"{Fore.LIGHTYELLOW_EX}NOTE: Testing Part Ends{Fore.RESET}")
+
+    if my_args.mds:
+        print("NOTE: Activating MDS function!")
+        # Factor Analysis default parameters
+        dimension = 2
+
+        # Factor Analysis parameters
+        if my_args.td:
+            dimension = my_args.td
+
+        print("\n" + "MDS Parameters:")
+        print(f"Dimension:{dimension}")
+
+        mds_result = func.mds(my_args.input, n_dimension=dimension)
+
+        mds_result_path = result_path + os.sep + output_prefix + "mds.csv"
+        mds_result.to_csv(mds_result_path)
+        print("NOTE: MDS Completed!")
+
+        # PLOTTING
+        if my_args.pc:
+            # Plot Scatter
+            print(f"NOTE: Activating PCA Plotting function!")
+            mds_result["Virus"] = mds_result.index
+            scatter_label = False
+            figure_format = "pdf"
+            if my_args.format:
+                figure_format = my_args.format
+
+            figure_name = result_path + os.sep + output_prefix + "MDS-Plot" + "." + figure_format
+            dpi = 300
+            transparent = False
+            figure_width = 8
+            figure_height = 6
+            palette = "RdYlBu"
+
+            if my_args.fname:
+                figure_name = result_path + os.sep + output_prefix + my_args.fname + "." + figure_format
+            if my_args.dpi:
+                dpi = my_args.dpi
+            if my_args.tp:
+                transparent = True
+            if my_args.fw:
+                figure_width = my_args.fw
+            if my_args.fh:
+                figure_height = my_args.fh
+            if my_args.sl:
+                scatter_label = True
+            if my_args.color:
+                palette = my_args.color
+
+            func.cluster_figure(mds_result,
+                                point_label=scatter_label,
+                                fig_name=figure_name,
+                                fig_dpi=dpi,
+                                tp_tag=transparent,
+                                fig_width=figure_width,
+                                fig_height=figure_height,
+                                color_tag=palette)
+
+            print("\n" + "NOTE: Plotting Completed!")
+
+        if my_args.pc2:
+            print(f"{Fore.LIGHTYELLOW_EX}NOTE: Testing Part Start{Fore.RESET}")
+            figure_name = result_path + os.sep + output_prefix + "mds-Plot" + ".pdf"
+            func.clustering_plot2(mds_result, fig_name=figure_name)
 
             print(f"{Fore.LIGHTYELLOW_EX}NOTE: Testing Part Ends{Fore.RESET}")
 

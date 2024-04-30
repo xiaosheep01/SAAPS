@@ -20,8 +20,8 @@ import constant as ct
 from matplotlib import pyplot as plt, patches
 import matplotlib.colors as mcolors
 import seaborn as sb
-from sklearn.decomposition import PCA, KernelPCA, TruncatedSVD
-from sklearn.manifold import TSNE, Isomap, SpectralEmbedding, LocallyLinearEmbedding
+from sklearn.decomposition import PCA, KernelPCA, TruncatedSVD, FastICA, FactorAnalysis
+from sklearn.manifold import TSNE, Isomap, SpectralEmbedding, LocallyLinearEmbedding, MDS
 from sklearn.preprocessing import OneHotEncoder
 import numpy as np
 import pandas as pd
@@ -749,20 +749,25 @@ def aaindex_encoding(seq_matrix: pd.DataFrame, site_list: List[int]) -> \
     return raw_aa_mat, filtered_matrix, expand_matrix, site_matrix
 
 
+def file_judge(onehot_file_path: str) -> pd.DataFrame:
+    filetype = file_type_judge(onehot_file_path)
+    if filetype == "CSV":
+        data_mat = pd.read_csv(onehot_file_path, header=0, index_col=0)
+    elif filetype == "XLSX":
+        data_mat = pd.read_excel(onehot_file_path, header=0, index_col=0)
+    else:
+        print(Fore.RED + "ERROR! The file type:%s is not supported right now!" % filetype)
+        sys.exit()
+    return data_mat
+
+
 def pca(onehot_file_path: str) -> pd.DataFrame:
     """
     Dimension reduction by principal component analysis
     :param onehot_file_path: the 'OneHot-Transform.csv'
     :return: dimension reduction result in csv file
     """
-    filetype = file_type_judge(onehot_file_path)
-    if filetype == "CSV":
-        onehot_mat = pd.read_csv(onehot_file_path, header=0, index_col=0)
-    elif filetype == "XLSX":
-        onehot_mat = pd.read_excel(onehot_file_path, header=0, index_col=0)
-    else:
-        print(Fore.RED + "ERROR! The file type:%s is not supported right now!" % filetype)
-        sys.exit()
+    onehot_mat = file_judge(onehot_file_path)
 
     # pca function
     dimension = 1  # the minimal dimension
@@ -794,14 +799,7 @@ def pca(onehot_file_path: str) -> pd.DataFrame:
 
 
 def tsne(onehot_file_path: str, n_dimension: int, perp: int, learn_rate: int, niter: int) -> pd.DataFrame:
-    filetype = file_type_judge(onehot_file_path)
-    if filetype == "CSV":
-        onehot_mat = pd.read_csv(onehot_file_path, header=0, index_col=0)
-    elif filetype == "XLSX":
-        onehot_mat = pd.read_excel(onehot_file_path, header=0, index_col=0)
-    else:
-        print(Fore.RED + "ERROR! The file type:%s is not supported right now!" % filetype)
-        sys.exit()
+    onehot_mat = file_judge(onehot_file_path)
 
     t_sne = TSNE(n_components=n_dimension,
                  perplexity=perp,
@@ -816,15 +814,41 @@ def tsne(onehot_file_path: str, n_dimension: int, perp: int, learn_rate: int, ni
     return tsne_data
 
 
+def ica(onehot_file_path: str, n_dimension: int) -> pd.DataFrame:
+    onehot_mat = file_judge(onehot_file_path)
+
+    ica_model = FastICA(n_components=n_dimension)
+    ica_data = ica_model.fit_transform(onehot_mat)
+    ica_data = pd.DataFrame(ica_data)
+    ica_data.index = onehot_mat.index
+    print("NOTE: The ICA result (Partial):", ica_data.head(), sep="\n")
+    return ica_data
+
+
+def factor_analysis(onehot_file_path: str, n_dimension: int) -> pd.DataFrame:
+    onehot_mat = file_judge(onehot_file_path)
+
+    fa_model = FactorAnalysis(n_components=n_dimension)
+    fa_data = fa_model.fit_transform(onehot_mat)
+    fa_data = pd.DataFrame(fa_data)
+    fa_data.index = onehot_mat.index
+    print("NOTE: The MDS result (Partial):", fa_data.head(), sep="\n")
+    return fa_data
+
+
+def mds(onehot_file_path: str, n_dimension: int) -> pd.DataFrame:
+    onehot_mat = file_judge(onehot_file_path)
+
+    mds_model = MDS(n_components=n_dimension)
+    mds_data = mds_model.fit_transform(onehot_mat)
+    mds_data = pd.DataFrame(mds_data)
+    mds_data.index = onehot_mat.index
+    print("NOTE: The MDS result (Partial):", mds_data.head(), sep="\n")
+    return mds_data
+
+
 def isomapping(onehot_file_path: str, n_dimension: int) -> pd.DataFrame:
-    filetype = file_type_judge(onehot_file_path)
-    if filetype == "CSV":
-        onehot_mat = pd.read_csv(onehot_file_path, header=0, index_col=0)
-    elif filetype == "XLSX":
-        onehot_mat = pd.read_excel(onehot_file_path, header=0, index_col=0)
-    else:
-        print(Fore.RED + "ERROR! The file type:%s is not supported right now!" % filetype)
-        sys.exit()
+    onehot_mat = file_judge(onehot_file_path)
 
     isomap = Isomap(n_components=n_dimension)
     isomap_data = isomap.fit_transform(onehot_mat)
@@ -835,14 +859,7 @@ def isomapping(onehot_file_path: str, n_dimension: int) -> pd.DataFrame:
 
 
 def spectremb(onehot_file_path: str, n_dimension: int) -> pd.DataFrame:
-    filetype = file_type_judge(onehot_file_path)
-    if filetype == "CSV":
-        onehot_mat = pd.read_csv(onehot_file_path, header=0, index_col=0)
-    elif filetype == "XLSX":
-        onehot_mat = pd.read_excel(onehot_file_path, header=0, index_col=0)
-    else:
-        print(Fore.RED + "ERROR! The file type:%s is not supported right now!" % filetype)
-        sys.exit()
+    onehot_mat = file_judge(onehot_file_path)
 
     spectremb = SpectralEmbedding(n_components=n_dimension, n_neighbors=3)
     spectremb_data = spectremb.fit_transform(onehot_mat)
@@ -853,14 +870,7 @@ def spectremb(onehot_file_path: str, n_dimension: int) -> pd.DataFrame:
 
 
 def my_lle(onehot_file_path: str, n_dimension: int) -> pd.DataFrame:
-    filetype = file_type_judge(onehot_file_path)
-    if filetype == "CSV":
-        onehot_mat = pd.read_csv(onehot_file_path, header=0, index_col=0)
-    elif filetype == "XLSX":
-        onehot_mat = pd.read_excel(onehot_file_path, header=0, index_col=0)
-    else:
-        print(Fore.RED + "ERROR! The file type:%s is not supported right now!" % filetype)
-        sys.exit()
+    onehot_mat = file_judge(onehot_file_path)
 
     lle = LocallyLinearEmbedding(n_components=n_dimension, n_neighbors=3)
     lle_data = lle.fit_transform(onehot_mat)
@@ -871,14 +881,7 @@ def my_lle(onehot_file_path: str, n_dimension: int) -> pd.DataFrame:
 
 
 def kernelPCA(onehot_file_path: str, n_dimension: int) -> pd.DataFrame:
-    filetype = file_type_judge(onehot_file_path)
-    if filetype == "CSV":
-        onehot_mat = pd.read_csv(onehot_file_path, header=0, index_col=0)
-    elif filetype == "XLSX":
-        onehot_mat = pd.read_excel(onehot_file_path, header=0, index_col=0)
-    else:
-        print(Fore.RED + "ERROR! The file type:%s is not supported right now!" % filetype)
-        sys.exit()
+    onehot_mat = file_judge(onehot_file_path)
 
     kPCA = KernelPCA(n_components=n_dimension, kernel="rbf", gamma=15)
     kPCA_data = kPCA.fit_transform(onehot_mat)
@@ -889,14 +892,7 @@ def kernelPCA(onehot_file_path: str, n_dimension: int) -> pd.DataFrame:
 
 
 def randomForest_PCA(onehot_file_path: str, n_dimension: int) -> pd.DataFrame:
-    filetype = file_type_judge(onehot_file_path)
-    if filetype == "CSV":
-        onehot_mat = pd.read_csv(onehot_file_path, header=0, index_col=0)
-    elif filetype == "XLSX":
-        onehot_mat = pd.read_excel(onehot_file_path, header=0, index_col=0)
-    else:
-        print(Fore.RED + "ERROR! The file type:%s is not supported right now!" % filetype)
-        sys.exit()
+    onehot_mat = file_judge(onehot_file_path)
 
     # Random Forest
     rf = RandomTreesEmbedding(n_estimators=1000, min_samples_leaf=1, min_samples_split=1.0, sparse_output=False)
@@ -1007,21 +1003,25 @@ def clustering_plot(cluster_res, dataframe: pd.DataFrame, fig_name: str) -> None
 
 
 def clustering_plot2(dataframe: pd.DataFrame, fig_name: str) -> None:
-    fig = plt.figure()
+    fig = plt.figure(figsize=(8, 6))
     ax = fig.add_subplot(111, projection="3d")
+
+    for label, color in zip(dataframe.index, ct.test_palette):
+        ax.scatter([], [], color=color, label=label)
 
     ax.scatter(dataframe.iloc[:, 0],
                dataframe.iloc[:, 1],
                dataframe.iloc[:, 2],
-               color=ct.test_palette2,
+               color=ct.test_palette,
                alpha=1)
 
+    plt.subplots_adjust(left=0.05)
     # 设置坐标轴标签
     ax.set_xlabel('C1')
     ax.set_ylabel('C2')
     ax.set_zlabel('C3')
     # 添加图例
-    # ax.legend(loc='center left', bbox_to_anchor=(1, 0.9))
+    ax.legend(loc='center left', bbox_to_anchor=(1.15, 0.5), fontsize="small")
     # 使用Seaborn设置图形样式
     sb.set(style="whitegrid")
     # 显示图形
@@ -1408,4 +1408,4 @@ def output_palettes() -> None:
 
 # Testing Part
 if __name__ == "__main__":
-    obtain_aaindex()
+    print(f"NOTE: You are in testing mode!")
