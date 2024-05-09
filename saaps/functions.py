@@ -22,7 +22,7 @@ import matplotlib.colors as mcolors
 import seaborn as sb
 from sklearn.decomposition import PCA, KernelPCA, TruncatedSVD, FastICA, FactorAnalysis
 from sklearn.manifold import TSNE, Isomap, SpectralEmbedding, LocallyLinearEmbedding, MDS
-from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 import numpy as np
 import pandas as pd
 from colorama import Fore
@@ -679,7 +679,16 @@ def obtain_aaindex() -> Tuple[dict, pd.DataFrame]:
     # delete columns containing "NA"
     aaindex_df_clean = aaindex_df.drop(columns=aaindex_df.columns[aaindex_df.isin(['NA']).any()])
     aaindex_df_clean = aaindex_df_clean.astype(float)
-    aaindex_df_T = aaindex_df_clean.transpose()
+
+    # normalized data -> z-score
+    scaler = StandardScaler()
+    normalized_data = scaler.fit_transform(aaindex_df_clean)
+    normalized_df = pd.DataFrame(normalized_data)
+    normalized_df.index = aaindex_df_clean.index
+    normalized_df.columns = aaindex_df_clean.columns
+
+    # matrix transpose
+    aaindex_df_T = normalized_df.transpose()
 
     print(f"NOTE: Valid Dimensions:{len(aaindex_df_T)}, Invalid Dimensions:{int(len(total_loc) / 2 - len(aaindex_df_T))}")
 
@@ -690,6 +699,7 @@ def obtain_aaindex() -> Tuple[dict, pd.DataFrame]:
         aaindex_df_T.to_csv(test_aa_csv)
         print("AAindex cleaned dataframe is following:")
         print(aaindex_df_T.head())
+
         print(f"{Fore.LIGHTYELLOW_EX}Testing Part Ends{Fore.RESET}" + "\n")
 
     # convert to a dictionary
@@ -1409,3 +1419,4 @@ def output_palettes() -> None:
 # Testing Part
 if __name__ == "__main__":
     print(f"NOTE: You are in testing mode!")
+    obtain_aaindex()
