@@ -1,0 +1,2 @@
+[console_scripts]
+saaps = saaps.main:starts

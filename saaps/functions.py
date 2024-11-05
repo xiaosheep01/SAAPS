@@ -9,7 +9,7 @@ import re
 import sys
 from functools import reduce
 from itertools import cycle
-from typing import Any, List, Tuple
+from typing import Any, List, Tuple, Union
 
 from sklearn import metrics
 from sklearn.cluster import DBSCAN, OPTICS, KMeans, AgglomerativeClustering
@@ -1167,7 +1167,7 @@ def polymorphism_figure(compute_polymorphism_df: pd.DataFrame,
                         compute_polymorphism_concise_list: List[str],
                         figure_name: str,
                         figure_dpi: int,
-                        transparent_tag: str or bool,
+                        transparent_tag: Union[str, bool],
                         fig_width=14,
                         fig_height=9) -> None:
     original_df = compute_polymorphism_df
@@ -1283,7 +1283,7 @@ def polymorphism_figure(compute_polymorphism_df: pd.DataFrame,
 def ic_scatter_figure(shannon_ic_df: pd.DataFrame,
                       fig_name: str,
                       fig_dpi: int,
-                      tp_tag: str or bool,
+                      tp_tag: Union[str, bool],
                       color_tag: str,
                       fig_width=10,
                       fig_height=8,
@@ -1344,7 +1344,7 @@ def cluster_figure(dr_result,
                    color_tag: str,
                    fig_name: str,
                    fig_dpi: int,
-                   tp_tag: str or bool,
+                   tp_tag: Union[str, bool],
                    fig_width: int,
                    fig_height: int) -> None:
     pc_1 = dr_result.iloc[:, 0]
