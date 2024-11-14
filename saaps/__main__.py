@@ -517,7 +517,7 @@ def starts():
             if my_args.format:
                 figure_format = my_args.format
 
-            figure_name = result_path + os.sep + output_prefix + "PCA-Plot" + "." + figure_format
+            figure_name = result_path + os.sep + output_prefix + "PCA-2d-Plot" + "." + figure_format
             dpi = 300
             transparent = False
             figure_width = 8
@@ -553,7 +553,7 @@ def starts():
 
         if my_args.pc2:
             print(f"{Fore.LIGHTYELLOW_EX}NOTE: Testing Part Start{Fore.RESET}")
-            figure_name = result_path + os.sep + output_prefix + "PCA-Plot" + ".pdf"
+            figure_name = result_path + os.sep + output_prefix + "PCA-3d-Plot" + ".pdf"
             func.clustering_plot2(pca_result, fig_name=figure_name)
 
             print(f"{Fore.LIGHTYELLOW_EX}NOTE: Testing Part Ends{Fore.RESET}")
