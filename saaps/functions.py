@@ -528,7 +528,21 @@ def shannon_entropy(file_path: str, maximum=0, minimum=0) -> pd.DataFrame:
     peptide_df = peptide_df.transpose()
     peptide_df.reset_index(inplace=True)
     peptide_df.columns = ["SITE", "IC"]
+    # 计算基本统计信息，包括上下四分位
     statistics_info = peptide_df["IC"].describe()
+    # 计算前10%和后10%的IC值
+    statistics_info["IC_10%"] = peptide_df["IC"].quantile(0.1)
+    statistics_info["IC_90%"] = peptide_df["IC"].quantile(0.9)
+    # 计算前15%和后15%的IC值
+    statistics_info["IC_15%"] = peptide_df["IC"].quantile(0.15)
+    statistics_info["IC_85%"] = peptide_df["IC"].quantile(0.85)
+    # 计算前20%和后20%的IC值
+    statistics_info["IC_20%"] = peptide_df["IC"].quantile(0.2)
+    statistics_info["IC_80%"] = peptide_df["IC"].quantile(0.8)
+    # 计算前30%和后30%的IC值
+    statistics_info["IC_30%"] = peptide_df["IC"].quantile(0.3)
+    statistics_info["IC_70%"] = peptide_df["IC"].quantile(0.7)
+
     shannon_log_path = os.path.dirname(file_path) + os.sep + "Shannon_log.txt"
 
     with open(shannon_log_path, "w") as F:
