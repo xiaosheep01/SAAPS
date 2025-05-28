@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # Development Time: 2024-02-27 14:06:38
 # Developer: XiaoYang
-import os.path
 
 # DNA codon translation table
 translate_table = {

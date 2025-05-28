@@ -1,3 +1,12 @@
+'''
+Author: littlesheep
+Email: Fredrik1999@163.com
+Date: 2024-11-18 10:39:49
+LastEditors: littlesheep Fredrik1999@163.com
+LastEditTime: 2025-04-11 09:48:34
+FilePath: /SAAPS/saaps/functions.py
+Description: 
+'''
 # -*- coding: utf-8 -*-
 # Development Time: 2024-02-27 10:54:00
 # Developer: XiaoYang
